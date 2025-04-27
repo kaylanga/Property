@@ -101,4 +101,42 @@ export const sendMessage = async (message: any) => {
 
   if (error) throw error;
   return data;
+};
+
+// Helper functions for mortgage applications
+export const getMortgageApplications = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('mortgage_applications')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
+
+export const getMortgageApplicationById = async (id: string) => {
+  const { data, error } = await supabase
+    .from('mortgage_applications')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const updateMortgageApplicationStatus = async (
+  id: string,
+  status: 'pending' | 'approved' | 'rejected'
+) => {
+  const { data, error } = await supabase
+    .from('mortgage_applications')
+    .update({ status })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }; 

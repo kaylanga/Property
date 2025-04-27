@@ -1,8 +1,18 @@
-export type PropertyType = 'apartment' | 'house' | 'condo' | 'land' | 'unfinished';
+export enum PropertyType {
+  HOUSE = 'HOUSE',
+  APARTMENT = 'APARTMENT',
+  LAND = 'LAND',
+  COMMERCIAL = 'COMMERCIAL'
+}
+
+export enum Currency {
+  UGX = 'UGX',
+  USD = 'USD',
+  KES = 'KES',
+  TZS = 'TZS'
+}
 
 export type PropertyStatus = 'for-sale' | 'for-rent';
-
-export type Currency = 'UGX' | 'USD' | 'KES' | 'TZS' | 'RWF';
 
 export type Amenity = 
   | 'parking'
@@ -44,15 +54,47 @@ export interface Property {
   title: string;
   description: string;
   type: PropertyType;
-  status: PropertyStatus;
   price: number;
   currency: Currency;
-  location: Location;
-  features: PropertyFeatures;
+  location: {
+    address: string;
+    city: string;
+    district: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+  };
+  features: {
+    bedrooms?: number;
+    bathrooms?: number;
+    area: number; // in square meters
+    yearBuilt?: number;
+    parking?: number;
+    furnished: boolean;
+  };
+  amenities: string[];
   images: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  agentId: string;
-  isVerified: boolean;
-  isFeatured: boolean;
+  status: 'AVAILABLE' | 'SOLD' | 'RENTED' | 'PENDING';
+  listingType: 'SALE' | 'RENT';
+  createdAt: string;
+  updatedAt: string;
+  ownerId: string;
+  verified: boolean;
+  documents: {
+    title: string;
+    url: string;
+    type: string;
+  }[];
+  virtualTour?: string;
+  propertyTax: number;
+  maintenanceFee?: number;
+  yearBuilt?: number;
+  lastRenovated?: number;
+  zoning?: string;
+  propertyCondition: 'new' | 'excellent' | 'good' | 'fair' | 'needs_renovation';
+  viewingAvailability: {
+    days: string[];
+    hours: string;
+  };
 } 

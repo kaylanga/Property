@@ -1,89 +1,88 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Currency } from '../../types/property';
+import React, { useEffect, useState } from 'react';
+import { useQuery } from 'react-query';
 
 interface CurrencyConverterProps {
   amount: number;
-  fromCurrency: Currency;
-  className?: string;
+  from: string;
+  to?: string;
 }
 
-const exchangeRates: Record<Currency, number> = {
-  UGX: 1,
-  USD: 0.00027,
-  KES: 0.041,
-  TZS: 0.63,
-  RWF: 0.32,
+const exchangeRates = {
+  USD: 1,
+  UGX: 3700, // 1 USD = 3700 UGX
+  KES: 130,  // 1 USD = 130 KES
+  TZS: 2500, // 1 USD = 2500 TZS
+  RWF: 1200, // 1 USD = 1200 RWF
+  ZAR: 18,   // 1 USD = 18 ZAR
+  NGN: 750,  // 1 USD = 750 NGN
+  GHS: 12,   // 1 USD = 12 GHS
 };
 
-export function CurrencyConverter({
+const currencySymbols = {
+  USD: '$',
+  UGX: 'UGX',
+  KES: 'KES',
+  TZS: 'TZS',
+  RWF: 'RWF',
+  ZAR: 'R',
+  NGN: '₦',
+  GHS: 'GH₵',
+};
+
+export const CurrencyConverter: React.FC<CurrencyConverterProps> = ({
   amount,
-  fromCurrency,
-  className = '',
-}: CurrencyConverterProps) {
-  const [userCurrency, setUserCurrency] = useState<Currency>('UGX');
-  const [convertedAmount, setConvertedAmount] = useState(amount);
+  from,
+  to,
+}) => {
+  const [userCurrency, setUserCurrency] = useState<string>('USD');
+  const [convertedAmount, setConvertedAmount] = useState<number>(amount);
 
+  // Detect user's location and set their currency
   useEffect(() => {
-    // Get user's location from cookies or browser
-    const getUserLocation = async () => {
+    const detectUserCurrency = async () => {
       try {
-        // First try to get from cookies
-        const storedCurrency = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('userCurrency='))
-          ?.split('=')[1] as Currency;
-
-        if (storedCurrency) {
-          setUserCurrency(storedCurrency);
-          return;
-        }
-
-        // If not in cookies, try to get from browser
         const response = await fetch('https://ipapi.co/json/');
         const data = await response.json();
-        
-        // Map country codes to currencies
-        const countryToCurrency: Record<string, Currency> = {
-          UG: 'UGX',
-          KE: 'KES',
-          TZ: 'TZS',
-          RW: 'RWF',
-        };
-
-        const detectedCurrency = countryToCurrency[data.country_code] || 'USD';
-        setUserCurrency(detectedCurrency);
-
-        // Store in cookies for 30 days
-        document.cookie = `userCurrency=${detectedCurrency};max-age=${30 * 24 * 60 * 60};path=/`;
+        const currency = data.currency || 'USD';
+        setUserCurrency(currency);
       } catch (error) {
-        console.error('Error detecting user location:', error);
+        console.error('Error detecting user currency:', error);
         setUserCurrency('USD');
       }
     };
 
-    getUserLocation();
+    detectUserCurrency();
   }, []);
 
+  // Convert amount when currencies or amount changes
   useEffect(() => {
-    // Convert amount when currencies change
-    const converted = amount * (exchangeRates[userCurrency] / exchangeRates[fromCurrency]);
-    setConvertedAmount(converted);
-  }, [amount, fromCurrency, userCurrency]);
+    const targetCurrency = to || userCurrency;
+    if (from === targetCurrency) {
+      setConvertedAmount(amount);
+      return;
+    }
 
-  const formatCurrency = (amount: number, currency: Currency) => {
+    const fromRate = exchangeRates[from as keyof typeof exchangeRates] || 1;
+    const toRate = exchangeRates[targetCurrency as keyof typeof exchangeRates] || 1;
+    const converted = (amount / fromRate) * toRate;
+    setConvertedAmount(converted);
+  }, [amount, from, to, userCurrency]);
+
+  const formatAmount = (amount: number, currency: string) => {
+    const symbol = currencySymbols[currency as keyof typeof currencySymbols] || currency;
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency,
+      currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
   };
 
   return (
-    <span className={className}>
-      {formatCurrency(convertedAmount, userCurrency)}
+    <span>
+      {formatAmount(convertedAmount, to || userCurrency)}
     </span>
   );
-} 
+}; 
