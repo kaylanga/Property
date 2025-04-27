@@ -1,24 +1,36 @@
 'use client';
 
 import React from 'react';
-import { useParams } from 'next/navigation';
-import { useQuery } from 'react-query';
+import { useParams, useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { getPropertyById } from '@/lib/supabase';
 import { Property } from '@/types/property';
 import { CurrencyConverter } from '@/components/common/currency-converter';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { SubscriptionPlans } from '@/components/subscription/subscription-plans';
 
 export default function PropertyDetails() {
   const params = useParams();
+  const router = useRouter();
   const propertyId = params.id as string;
+  const { hasActiveSubscription } = useSubscription();
 
-  const { data: property, isLoading, error } = useQuery<Property>(
-    ['property', propertyId],
-    () => getPropertyById(propertyId)
-  );
+  const { data: property, isLoading, error } = useQuery({
+    queryKey: ['property', propertyId],
+    queryFn: () => getPropertyById(propertyId),
+  });
 
   if (isLoading) return <div className="flex justify-center p-8">Loading property details...</div>;
   if (error) return <div className="text-red-500 p-8">Error loading property details</div>;
   if (!property) return <div className="text-red-500 p-8">Property not found</div>;
+
+  const handleContactClick = () => {
+    if (!hasActiveSubscription) {
+      router.push('/subscription');
+      return;
+    }
+    // Handle contact action (e.g., open chat or contact form)
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -32,7 +44,7 @@ export default function PropertyDetails() {
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {property.images.slice(1, 5).map((image, index) => (
+          {property.images.slice(1, 5).map((image: string, index: number) => (
             <div key={index} className="relative h-44">
               <img
                 src={image}
@@ -69,7 +81,7 @@ export default function PropertyDetails() {
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4">Features</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {Object.entries(property.amenities).map(([key, value]) => (
+              {Object.entries(property.amenities as Record<string, boolean>).map(([key, value]) => (
                 value && (
                   <div key={key} className="flex items-center space-x-2">
                     <span className="text-green-500">✓</span>
@@ -133,7 +145,7 @@ export default function PropertyDetails() {
             <div className="space-y-2">
               <p className="font-semibold">Available Days:</p>
               <div className="flex flex-wrap gap-2">
-                {property.viewingAvailability.days.map((day) => (
+                {property.viewingAvailability.days.map((day: string) => (
                   <span key={day} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
                     {day}
                   </span>
@@ -144,14 +156,28 @@ export default function PropertyDetails() {
             </div>
           </div>
 
-          <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700">
-            Schedule Viewing
-          </button>
-          <button className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700">
-            Make Offer
-          </button>
+          <div className="space-y-4">
+            <button
+              onClick={handleContactClick}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+            >
+              {hasActiveSubscription ? 'Contact Owner' : 'Subscribe to Contact'}
+            </button>
+            <button className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700">
+              Schedule Viewing
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Subscription Plans Modal */}
+      {!hasActiveSubscription && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <SubscriptionPlans />
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
