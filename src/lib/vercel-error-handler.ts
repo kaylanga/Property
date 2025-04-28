@@ -1,131 +1,304 @@
 import { NextResponse } from 'next/server';
 
 export enum VercelErrorCode {
-  // Build Errors
-  BUILD_ERROR = 'BUILD_ERROR',
-  DEPLOYMENT_ERROR = 'DEPLOYMENT_ERROR',
+  // Function Errors (500-599)
+  BODY_NOT_A_STRING_FROM_FUNCTION = 'BODY_NOT_A_STRING_FROM_FUNCTION',
+  MIDDLEWARE_INVOCATION_FAILED = 'MIDDLEWARE_INVOCATION_FAILED',
+  MIDDLEWARE_INVOCATION_TIMEOUT = 'MIDDLEWARE_INVOCATION_TIMEOUT',
+  EDGE_FUNCTION_INVOCATION_FAILED = 'EDGE_FUNCTION_INVOCATION_FAILED',
+  EDGE_FUNCTION_INVOCATION_TIMEOUT = 'EDGE_FUNCTION_INVOCATION_TIMEOUT',
+  FUNCTION_INVOCATION_FAILED = 'FUNCTION_INVOCATION_FAILED',
+  FUNCTION_INVOCATION_TIMEOUT = 'FUNCTION_INVOCATION_TIMEOUT',
+  FUNCTION_PAYLOAD_TOO_LARGE = 'FUNCTION_PAYLOAD_TOO_LARGE',
+  FUNCTION_RESPONSE_PAYLOAD_TOO_LARGE = 'FUNCTION_RESPONSE_PAYLOAD_TOO_LARGE',
+  FUNCTION_THROTTLED = 'FUNCTION_THROTTLED',
+  NO_RESPONSE_FROM_FUNCTION = 'NO_RESPONSE_FROM_FUNCTION',
   
-  // Runtime Errors
-  RUNTIME_ERROR = 'RUNTIME_ERROR',
-  FUNCTION_ERROR = 'FUNCTION_ERROR',
+  // Deployment Errors
+  DEPLOYMENT_BLOCKED = 'DEPLOYMENT_BLOCKED',
+  DEPLOYMENT_PAUSED = 'DEPLOYMENT_PAUSED',
+  DEPLOYMENT_DISABLED = 'DEPLOYMENT_DISABLED',
+  DEPLOYMENT_NOT_FOUND = 'DEPLOYMENT_NOT_FOUND',
+  DEPLOYMENT_DELETED = 'DEPLOYMENT_DELETED',
+  DEPLOYMENT_NOT_READY_REDIRECTING = 'DEPLOYMENT_NOT_READY_REDIRECTING',
   
-  // API Errors
-  API_ERROR = 'API_ERROR',
-  RATE_LIMIT_ERROR = 'RATE_LIMIT_ERROR',
+  // DNS Errors
+  DNS_HOSTNAME_EMPTY = 'DNS_HOSTNAME_EMPTY',
+  DNS_HOSTNAME_NOT_FOUND = 'DNS_HOSTNAME_NOT_FOUND',
+  DNS_HOSTNAME_RESOLVE_FAILED = 'DNS_HOSTNAME_RESOLVE_FAILED',
+  DNS_HOSTNAME_RESOLVED_PRIVATE = 'DNS_HOSTNAME_RESOLVED_PRIVATE',
+  DNS_HOSTNAME_SERVER_ERROR = 'DNS_HOSTNAME_SERVER_ERROR',
   
-  // Environment Errors
-  ENV_ERROR = 'ENV_ERROR',
-  CONFIG_ERROR = 'CONFIG_ERROR',
-  
-  // Resource Errors
-  MEMORY_LIMIT_ERROR = 'MEMORY_LIMIT_ERROR',
-  TIMEOUT_ERROR = 'TIMEOUT_ERROR',
-  
-  // Network Errors
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  DNS_ERROR = 'DNS_ERROR',
-  
-  // Authentication Errors
-  AUTH_ERROR = 'AUTH_ERROR',
-  PERMISSION_ERROR = 'PERMISSION_ERROR',
-  
-  // Database Errors
-  DATABASE_ERROR = 'DATABASE_ERROR',
-  CONNECTION_ERROR = 'CONNECTION_ERROR',
+  // Routing Errors
+  TOO_MANY_FORKS = 'TOO_MANY_FORKS',
+  TOO_MANY_FILESYSTEM_CHECKS = 'TOO_MANY_FILESYSTEM_CHECKS',
+  ROUTER_CANNOT_MATCH = 'ROUTER_CANNOT_MATCH',
+  ROUTER_EXTERNAL_TARGET_CONNECTION_ERROR = 'ROUTER_EXTERNAL_TARGET_CONNECTION_ERROR',
+  ROUTER_EXTERNAL_TARGET_ERROR = 'ROUTER_EXTERNAL_TARGET_ERROR',
+  ROUTER_TOO_MANY_HAS_SELECTIONS = 'ROUTER_TOO_MANY_HAS_SELECTIONS',
+  ROUTER_EXTERNAL_TARGET_HANDSHAKE_ERROR = 'ROUTER_EXTERNAL_TARGET_HANDSHAKE_ERROR',
   
   // Request Errors
-  URL_TOO_LONG = 'URL_TOO_LONG',
-  REQUEST_HEADER_TOO_LARGE = 'REQUEST_HEADER_TOO_LARGE',
   INVALID_REQUEST_METHOD = 'INVALID_REQUEST_METHOD',
-  FUNCTION_PAYLOAD_TOO_LARGE = 'FUNCTION_PAYLOAD_TOO_LARGE',
+  MALFORMED_REQUEST_HEADER = 'MALFORMED_REQUEST_HEADER',
+  REQUEST_HEADER_TOO_LARGE = 'REQUEST_HEADER_TOO_LARGE',
+  RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
+  URL_TOO_LONG = 'URL_TOO_LONG',
   
-  // Unknown Error
-  UNKNOWN_ERROR = 'UNKNOWN_ERROR'
+  // Range Errors
+  RANGE_END_NOT_VALID = 'RANGE_END_NOT_VALID',
+  RANGE_GROUP_NOT_VALID = 'RANGE_GROUP_NOT_VALID',
+  RANGE_MISSING_UNIT = 'RANGE_MISSING_UNIT',
+  RANGE_START_NOT_VALID = 'RANGE_START_NOT_VALID',
+  RANGE_UNIT_NOT_SUPPORTED = 'RANGE_UNIT_NOT_SUPPORTED',
+  TOO_MANY_RANGES = 'TOO_MANY_RANGES',
+  
+  // Image Errors
+  INVALID_IMAGE_OPTIMIZE_REQUEST = 'INVALID_IMAGE_OPTIMIZE_REQUEST',
+  OPTIMIZED_EXTERNAL_IMAGE_REQUEST_FAILED = 'OPTIMIZED_EXTERNAL_IMAGE_REQUEST_FAILED',
+  OPTIMIZED_EXTERNAL_IMAGE_REQUEST_INVALID = 'OPTIMIZED_EXTERNAL_IMAGE_REQUEST_INVALID',
+  OPTIMIZED_EXTERNAL_IMAGE_REQUEST_UNAUTHORIZED = 'OPTIMIZED_EXTERNAL_IMAGE_REQUEST_UNAUTHORIZED',
+  OPTIMIZED_EXTERNAL_IMAGE_TOO_MANY_REDIRECTS = 'OPTIMIZED_EXTERNAL_IMAGE_TOO_MANY_REDIRECTS',
+  
+  // Cache Errors
+  FALLBACK_BODY_TOO_LARGE = 'FALLBACK_BODY_TOO_LARGE',
+  
+  // Internal Platform Errors
+  INTERNAL_EDGE_FUNCTION_INVOCATION_FAILED = 'INTERNAL_EDGE_FUNCTION_INVOCATION_FAILED',
+  INTERNAL_EDGE_FUNCTION_INVOCATION_TIMEOUT = 'INTERNAL_EDGE_FUNCTION_INVOCATION_TIMEOUT',
+  INTERNAL_FUNCTION_INVOCATION_FAILED = 'INTERNAL_FUNCTION_INVOCATION_FAILED',
+  INTERNAL_FUNCTION_INVOCATION_TIMEOUT = 'INTERNAL_FUNCTION_INVOCATION_TIMEOUT',
+  INTERNAL_FUNCTION_NOT_FOUND = 'INTERNAL_FUNCTION_NOT_FOUND',
+  INTERNAL_FUNCTION_NOT_READY = 'INTERNAL_FUNCTION_NOT_READY',
+  INTERNAL_DEPLOYMENT_FETCH_FAILED = 'INTERNAL_DEPLOYMENT_FETCH_FAILED',
+  INTERNAL_UNARCHIVE_FAILED = 'INTERNAL_UNARCHIVE_FAILED',
+  INTERNAL_UNEXPECTED_ERROR = 'INTERNAL_UNEXPECTED_ERROR',
+  INTERNAL_ROUTER_CANNOT_PARSE_PATH = 'INTERNAL_ROUTER_CANNOT_PARSE_PATH',
+  INTERNAL_STATIC_REQUEST_FAILED = 'INTERNAL_STATIC_REQUEST_FAILED',
+  INTERNAL_OPTIMIZED_IMAGE_REQUEST_FAILED = 'INTERNAL_OPTIMIZED_IMAGE_REQUEST_FAILED',
+  INTERNAL_CACHE_ERROR = 'INTERNAL_CACHE_ERROR',
+  INTERNAL_CACHE_KEY_TOO_LONG = 'INTERNAL_CACHE_KEY_TOO_LONG',
+  INTERNAL_CACHE_LOCK_FULL = 'INTERNAL_CACHE_LOCK_FULL',
+  INTERNAL_CACHE_LOCK_TIMEOUT = 'INTERNAL_CACHE_LOCK_TIMEOUT',
+  INTERNAL_MISSING_RESPONSE_FROM_CACHE = 'INTERNAL_MISSING_RESPONSE_FROM_CACHE',
+  INTERNAL_FUNCTION_SERVICE_UNAVAILABLE = 'INTERNAL_FUNCTION_SERVICE_UNAVAILABLE',
+  INTERNAL_MICROFRONTENDS_INVALID_CONFIGURATION_ERROR = 'INTERNAL_MICROFRONTENDS_INVALID_CONFIGURATION_ERROR',
+  INTERNAL_MICROFRONTENDS_BUILD_ERROR = 'INTERNAL_MICROFRONTENDS_BUILD_ERROR',
+  INTERNAL_MICROFRONTENDS_UNEXPECTED_ERROR = 'INTERNAL_MICROFRONTENDS_UNEXPECTED_ERROR'
 }
 
-interface VercelError extends Error {
-  code: VercelErrorCode;
-  statusCode?: number;
-  details?: any;
-}
+// Map error codes to their corresponding HTTP status codes
+const errorStatusCodes: Record<VercelErrorCode, number> = {
+  // Function Errors
+  BODY_NOT_A_STRING_FROM_FUNCTION: 502,
+  MIDDLEWARE_INVOCATION_FAILED: 500,
+  MIDDLEWARE_INVOCATION_TIMEOUT: 504,
+  EDGE_FUNCTION_INVOCATION_FAILED: 500,
+  EDGE_FUNCTION_INVOCATION_TIMEOUT: 504,
+  FUNCTION_INVOCATION_FAILED: 500,
+  FUNCTION_INVOCATION_TIMEOUT: 504,
+  FUNCTION_PAYLOAD_TOO_LARGE: 413,
+  FUNCTION_RESPONSE_PAYLOAD_TOO_LARGE: 500,
+  FUNCTION_THROTTLED: 503,
+  NO_RESPONSE_FROM_FUNCTION: 502,
+  
+  // Deployment Errors
+  DEPLOYMENT_BLOCKED: 403,
+  DEPLOYMENT_PAUSED: 503,
+  DEPLOYMENT_DISABLED: 402,
+  DEPLOYMENT_NOT_FOUND: 404,
+  DEPLOYMENT_DELETED: 410,
+  DEPLOYMENT_NOT_READY_REDIRECTING: 303,
+  
+  // DNS Errors
+  DNS_HOSTNAME_EMPTY: 502,
+  DNS_HOSTNAME_NOT_FOUND: 502,
+  DNS_HOSTNAME_RESOLVE_FAILED: 502,
+  DNS_HOSTNAME_RESOLVED_PRIVATE: 404,
+  DNS_HOSTNAME_SERVER_ERROR: 502,
+  
+  // Routing Errors
+  TOO_MANY_FORKS: 502,
+  TOO_MANY_FILESYSTEM_CHECKS: 502,
+  ROUTER_CANNOT_MATCH: 502,
+  ROUTER_EXTERNAL_TARGET_CONNECTION_ERROR: 502,
+  ROUTER_EXTERNAL_TARGET_ERROR: 502,
+  ROUTER_TOO_MANY_HAS_SELECTIONS: 502,
+  ROUTER_EXTERNAL_TARGET_HANDSHAKE_ERROR: 502,
+  
+  // Request Errors
+  INVALID_REQUEST_METHOD: 405,
+  MALFORMED_REQUEST_HEADER: 400,
+  REQUEST_HEADER_TOO_LARGE: 431,
+  RESOURCE_NOT_FOUND: 404,
+  URL_TOO_LONG: 414,
+  
+  // Range Errors
+  RANGE_END_NOT_VALID: 416,
+  RANGE_GROUP_NOT_VALID: 416,
+  RANGE_MISSING_UNIT: 416,
+  RANGE_START_NOT_VALID: 416,
+  RANGE_UNIT_NOT_SUPPORTED: 416,
+  TOO_MANY_RANGES: 416,
+  
+  // Image Errors
+  INVALID_IMAGE_OPTIMIZE_REQUEST: 400,
+  OPTIMIZED_EXTERNAL_IMAGE_REQUEST_FAILED: 502,
+  OPTIMIZED_EXTERNAL_IMAGE_REQUEST_INVALID: 502,
+  OPTIMIZED_EXTERNAL_IMAGE_REQUEST_UNAUTHORIZED: 502,
+  OPTIMIZED_EXTERNAL_IMAGE_TOO_MANY_REDIRECTS: 502,
+  
+  // Cache Errors
+  FALLBACK_BODY_TOO_LARGE: 502,
+  
+  // Internal Platform Errors (all 500)
+  INTERNAL_EDGE_FUNCTION_INVOCATION_FAILED: 500,
+  INTERNAL_EDGE_FUNCTION_INVOCATION_TIMEOUT: 500,
+  INTERNAL_FUNCTION_INVOCATION_FAILED: 500,
+  INTERNAL_FUNCTION_INVOCATION_TIMEOUT: 500,
+  INTERNAL_FUNCTION_NOT_FOUND: 500,
+  INTERNAL_FUNCTION_NOT_READY: 500,
+  INTERNAL_DEPLOYMENT_FETCH_FAILED: 500,
+  INTERNAL_UNARCHIVE_FAILED: 500,
+  INTERNAL_UNEXPECTED_ERROR: 500,
+  INTERNAL_ROUTER_CANNOT_PARSE_PATH: 500,
+  INTERNAL_STATIC_REQUEST_FAILED: 500,
+  INTERNAL_OPTIMIZED_IMAGE_REQUEST_FAILED: 500,
+  INTERNAL_CACHE_ERROR: 500,
+  INTERNAL_CACHE_KEY_TOO_LONG: 500,
+  INTERNAL_CACHE_LOCK_FULL: 500,
+  INTERNAL_CACHE_LOCK_TIMEOUT: 500,
+  INTERNAL_MISSING_RESPONSE_FROM_CACHE: 500,
+  INTERNAL_FUNCTION_SERVICE_UNAVAILABLE: 500,
+  INTERNAL_MICROFRONTENDS_INVALID_CONFIGURATION_ERROR: 500,
+  INTERNAL_MICROFRONTENDS_BUILD_ERROR: 500,
+  INTERNAL_MICROFRONTENDS_UNEXPECTED_ERROR: 500
+};
 
-export function handleVercelError(error: any): VercelError {
-  // Default error
-  const vercelError: VercelError = {
-    name: 'VercelError',
-    message: 'An unexpected error occurred',
-    code: VercelErrorCode.UNKNOWN_ERROR,
-    statusCode: 500
-  };
+export function handleVercelError(error: any): NextResponse {
+  let code = VercelErrorCode.INTERNAL_UNEXPECTED_ERROR;
+  let message = 'An unexpected error occurred';
+  let details = undefined;
 
-  // Handle different types of errors
   if (error instanceof Error) {
-    vercelError.message = error.message;
+    message = error.message;
     
-    // Check for specific error types
-    if (error.message.includes('build')) {
-      vercelError.code = VercelErrorCode.BUILD_ERROR;
-      vercelError.statusCode = 500;
-    } else if (error.message.includes('deploy')) {
-      vercelError.code = VercelErrorCode.DEPLOYMENT_ERROR;
-      vercelError.statusCode = 500;
-    } else if (error.message.includes('rate limit')) {
-      vercelError.code = VercelErrorCode.RATE_LIMIT_ERROR;
-      vercelError.statusCode = 429;
-    } else if (error.message.includes('timeout')) {
-      vercelError.code = VercelErrorCode.TIMEOUT_ERROR;
-      vercelError.statusCode = 504;
-    } else if (error.message.includes('memory')) {
-      vercelError.code = VercelErrorCode.MEMORY_LIMIT_ERROR;
-      vercelError.statusCode = 500;
-    } else if (error.message.includes('database')) {
-      vercelError.code = VercelErrorCode.DATABASE_ERROR;
-      vercelError.statusCode = 500;
-    } else if (error.message.includes('auth')) {
-      vercelError.code = VercelErrorCode.AUTH_ERROR;
-      vercelError.statusCode = 401;
-    } else if (error.message.includes('permission')) {
-      vercelError.code = VercelErrorCode.PERMISSION_ERROR;
-      vercelError.statusCode = 403;
+    // Try to determine the error code from the message
+    for (const [errorCode] of Object.entries(VercelErrorCode)) {
+      if (error.message.includes(errorCode)) {
+        code = errorCode as VercelErrorCode;
+        break;
+      }
     }
+  } else if (typeof error === 'string' && error in VercelErrorCode) {
+    code = error as VercelErrorCode;
   }
 
-  // Add any additional details
   if (error.details) {
-    vercelError.details = error.details;
+    details = error.details;
   }
 
-  return vercelError;
+  return NextResponse.json(
+    { 
+      error: message,
+      code,
+      details
+    },
+    { status: errorStatusCodes[code] || 500 }
+  );
 }
 
-export function isVercelError(error: any): error is VercelError {
+export function isVercelError(error: any): error is { code: VercelErrorCode; message: string; details?: any } {
   return error && 'code' in error && Object.values(VercelErrorCode).includes(error.code);
 }
 
-export function getErrorMessage(error: VercelError): string {
+export function getErrorMessage(code: VercelErrorCode): string {
   const errorMessages: Record<VercelErrorCode, string> = {
-    [VercelErrorCode.BUILD_ERROR]: 'Failed to build the application',
-    [VercelErrorCode.DEPLOYMENT_ERROR]: 'Failed to deploy the application',
-    [VercelErrorCode.RUNTIME_ERROR]: 'A runtime error occurred',
-    [VercelErrorCode.FUNCTION_ERROR]: 'A serverless function error occurred',
-    [VercelErrorCode.API_ERROR]: 'An API error occurred',
-    [VercelErrorCode.RATE_LIMIT_ERROR]: 'Rate limit exceeded',
-    [VercelErrorCode.ENV_ERROR]: 'Environment configuration error',
-    [VercelErrorCode.CONFIG_ERROR]: 'Application configuration error',
-    [VercelErrorCode.MEMORY_LIMIT_ERROR]: 'Memory limit exceeded',
-    [VercelErrorCode.TIMEOUT_ERROR]: 'Request timeout',
-    [VercelErrorCode.NETWORK_ERROR]: 'Network error occurred',
-    [VercelErrorCode.DNS_ERROR]: 'DNS resolution error',
-    [VercelErrorCode.AUTH_ERROR]: 'Authentication error',
-    [VercelErrorCode.PERMISSION_ERROR]: 'Permission denied',
-    [VercelErrorCode.DATABASE_ERROR]: 'Database error occurred',
-    [VercelErrorCode.CONNECTION_ERROR]: 'Connection error occurred',
-    [VercelErrorCode.URL_TOO_LONG]: 'URL too long',
-    [VercelErrorCode.REQUEST_HEADER_TOO_LARGE]: 'Request header too large',
-    [VercelErrorCode.INVALID_REQUEST_METHOD]: 'Invalid request method',
-    [VercelErrorCode.FUNCTION_PAYLOAD_TOO_LARGE]: 'Function payload too large',
-    [VercelErrorCode.UNKNOWN_ERROR]: 'An unknown error occurred'
+    // Function Errors
+    BODY_NOT_A_STRING_FROM_FUNCTION: 'Function returned invalid response type',
+    MIDDLEWARE_INVOCATION_FAILED: 'Middleware execution failed',
+    MIDDLEWARE_INVOCATION_TIMEOUT: 'Middleware execution timed out',
+    EDGE_FUNCTION_INVOCATION_FAILED: 'Edge function execution failed',
+    EDGE_FUNCTION_INVOCATION_TIMEOUT: 'Edge function execution timed out',
+    FUNCTION_INVOCATION_FAILED: 'Function execution failed',
+    FUNCTION_INVOCATION_TIMEOUT: 'Function execution timed out',
+    FUNCTION_PAYLOAD_TOO_LARGE: 'Function payload too large',
+    FUNCTION_RESPONSE_PAYLOAD_TOO_LARGE: 'Function response payload too large',
+    FUNCTION_THROTTLED: 'Function throttled due to excessive load',
+    NO_RESPONSE_FROM_FUNCTION: 'No response received from function',
+    
+    // Deployment Errors
+    DEPLOYMENT_BLOCKED: 'Deployment blocked',
+    DEPLOYMENT_PAUSED: 'Deployment paused',
+    DEPLOYMENT_DISABLED: 'Deployment disabled',
+    DEPLOYMENT_NOT_FOUND: 'Deployment not found',
+    DEPLOYMENT_DELETED: 'Deployment has been deleted',
+    DEPLOYMENT_NOT_READY_REDIRECTING: 'Deployment not ready, redirecting',
+    
+    // DNS Errors
+    DNS_HOSTNAME_EMPTY: 'DNS hostname is empty',
+    DNS_HOSTNAME_NOT_FOUND: 'DNS hostname not found',
+    DNS_HOSTNAME_RESOLVE_FAILED: 'Failed to resolve DNS hostname',
+    DNS_HOSTNAME_RESOLVED_PRIVATE: 'DNS hostname resolved to private IP',
+    DNS_HOSTNAME_SERVER_ERROR: 'DNS server error',
+    
+    // Routing Errors
+    TOO_MANY_FORKS: 'Too many routing forks',
+    TOO_MANY_FILESYSTEM_CHECKS: 'Too many filesystem checks',
+    ROUTER_CANNOT_MATCH: 'Router cannot match path',
+    ROUTER_EXTERNAL_TARGET_CONNECTION_ERROR: 'Failed to connect to external target',
+    ROUTER_EXTERNAL_TARGET_ERROR: 'External target error',
+    ROUTER_TOO_MANY_HAS_SELECTIONS: 'Too many route selections',
+    ROUTER_EXTERNAL_TARGET_HANDSHAKE_ERROR: 'External target handshake failed',
+    
+    // Request Errors
+    INVALID_REQUEST_METHOD: 'Invalid request method',
+    MALFORMED_REQUEST_HEADER: 'Malformed request header',
+    REQUEST_HEADER_TOO_LARGE: 'Request header too large',
+    RESOURCE_NOT_FOUND: 'Resource not found',
+    URL_TOO_LONG: 'URL too long',
+    
+    // Range Errors
+    RANGE_END_NOT_VALID: 'Invalid range end',
+    RANGE_GROUP_NOT_VALID: 'Invalid range group',
+    RANGE_MISSING_UNIT: 'Missing range unit',
+    RANGE_START_NOT_VALID: 'Invalid range start',
+    RANGE_UNIT_NOT_SUPPORTED: 'Range unit not supported',
+    TOO_MANY_RANGES: 'Too many ranges requested',
+    
+    // Image Errors
+    INVALID_IMAGE_OPTIMIZE_REQUEST: 'Invalid image optimization request',
+    OPTIMIZED_EXTERNAL_IMAGE_REQUEST_FAILED: 'External image optimization failed',
+    OPTIMIZED_EXTERNAL_IMAGE_REQUEST_INVALID: 'Invalid external image request',
+    OPTIMIZED_EXTERNAL_IMAGE_REQUEST_UNAUTHORIZED: 'Unauthorized external image request',
+    OPTIMIZED_EXTERNAL_IMAGE_TOO_MANY_REDIRECTS: 'Too many redirects for external image',
+    
+    // Cache Errors
+    FALLBACK_BODY_TOO_LARGE: 'Fallback response body too large',
+    
+    // Internal Platform Errors
+    INTERNAL_EDGE_FUNCTION_INVOCATION_FAILED: 'Internal edge function error',
+    INTERNAL_EDGE_FUNCTION_INVOCATION_TIMEOUT: 'Internal edge function timeout',
+    INTERNAL_FUNCTION_INVOCATION_FAILED: 'Internal function error',
+    INTERNAL_FUNCTION_INVOCATION_TIMEOUT: 'Internal function timeout',
+    INTERNAL_FUNCTION_NOT_FOUND: 'Internal function not found',
+    INTERNAL_FUNCTION_NOT_READY: 'Internal function not ready',
+    INTERNAL_DEPLOYMENT_FETCH_FAILED: 'Internal deployment fetch failed',
+    INTERNAL_UNARCHIVE_FAILED: 'Internal unarchive failed',
+    INTERNAL_UNEXPECTED_ERROR: 'Internal server error',
+    INTERNAL_ROUTER_CANNOT_PARSE_PATH: 'Internal router path parsing error',
+    INTERNAL_STATIC_REQUEST_FAILED: 'Internal static request failed',
+    INTERNAL_OPTIMIZED_IMAGE_REQUEST_FAILED: 'Internal image optimization failed',
+    INTERNAL_CACHE_ERROR: 'Internal cache error',
+    INTERNAL_CACHE_KEY_TOO_LONG: 'Internal cache key too long',
+    INTERNAL_CACHE_LOCK_FULL: 'Internal cache lock full',
+    INTERNAL_CACHE_LOCK_TIMEOUT: 'Internal cache lock timeout',
+    INTERNAL_MISSING_RESPONSE_FROM_CACHE: 'Internal cache response missing',
+    INTERNAL_FUNCTION_SERVICE_UNAVAILABLE: 'Internal function service unavailable',
+    INTERNAL_MICROFRONTENDS_INVALID_CONFIGURATION_ERROR: 'Invalid microfrontends configuration',
+    INTERNAL_MICROFRONTENDS_BUILD_ERROR: 'Microfrontends build error',
+    INTERNAL_MICROFRONTENDS_UNEXPECTED_ERROR: 'Unexpected microfrontends error'
   };
 
-  return errorMessages[error.code] || error.message;
+  return errorMessages[code] || 'An unknown error occurred';
 } 
