@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Currency } from '../../../../types/property';
+import { handleApiError } from '@/lib/api-error-handler';
+import { validateRequest } from '@/lib/request-validation';
+import { NextRequest } from 'next/server';
 
 type MobileMoneyProvider = 'MTN Mobile Money' | 'M-Pesa' | 'Airtel Money' | 'Tigo Pesa';
 
@@ -40,7 +43,13 @@ type RequestData = {
   provider: MobileMoneyProvider;
 };
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // Validate the request
+  const validationError = validateRequest(request);
+  if (validationError) {
+    return validationError;
+  }
+
   try {
     const { amount, currency, phoneNumber, provider } = (await request.json()) as RequestData;
 
@@ -76,10 +85,6 @@ export async function POST(request: Request) {
       message: 'Payment initiated successfully',
     });
   } catch (error) {
-    console.error('Mobile money payment error:', error);
-    return NextResponse.json(
-      { error: 'Mobile money payment failed' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Mobile Money Payment');
   }
 } 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { Currency } from '../../../../types/property';
+import { handleApiError } from '@/lib/api-error-handler';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
@@ -21,10 +22,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    console.error('Payment processing error:', error);
-    return NextResponse.json(
-      { error: 'Payment processing failed' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Payment Processing');
   }
 } 

@@ -14,11 +14,17 @@ export async function middleware(request: NextRequest) {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Missing Supabase environment variables')
+    // Return a more graceful response instead of failing
     return response
   }
 
   try {
-    const supabase = createServerClient(
+    // Set a timeout for the Supabase operation
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Middleware timeout')), 5000);
+    });
+
+    const supabasePromise = createServerClient(
       supabaseUrl,
       supabaseAnonKey,
       {
@@ -42,9 +48,13 @@ export async function middleware(request: NextRequest) {
           },
         },
       }
-    )
+    ).auth.getSession();
 
-    const { data: { session } } = await supabase.auth.getSession()
+    // Race between the timeout and the actual operation
+    const { data: { session } } = await Promise.race([
+      supabasePromise,
+      timeoutPromise
+    ]) as { data: { session: any } };
 
     // Protected routes
     const protectedRoutes = ['/dashboard', '/profile', '/settings']
@@ -67,6 +77,7 @@ export async function middleware(request: NextRequest) {
     return response
   } catch (error) {
     console.error('Error in middleware:', error)
+    // Return a graceful response instead of failing
     return response
   }
 }
