@@ -1,28 +1,74 @@
+/**
+ * Currency Converter Component
+ * 
+ * A reusable component that converts property prices between different currencies.
+ * Automatically detects the user's location and preferred currency, with fallback to USD.
+ * Supports multiple African currencies including UGX, KES, TZS, RWF, and USD.
+ * 
+ * Exchange rates are relative to UGX (Ugandan Shilling) as the base currency.
+ * The component handles:
+ * - Automatic currency detection based on user's location
+ * - Currency preference persistence in cookies
+ * - Real-time currency conversion
+ * - Proper currency formatting using Intl.NumberFormat
+ * 
+ * @module currency-converter
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Currency } from '../../types/property';
 
+/**
+ * Props for the CurrencyConverter component
+ * @interface CurrencyConverterProps
+ * @property {number} amount - The amount to convert
+ * @property {Currency} fromCurrency - The source currency of the amount
+ * @property {string} [className] - Optional CSS class name for styling
+ */
 interface CurrencyConverterProps {
   amount: number;
   fromCurrency: Currency;
   className?: string;
 }
 
+/**
+ * Exchange rates relative to UGX (Ugandan Shilling)
+ * These rates represent the value of 1 UGX in each currency
+ * For example: 1 UGX = 0.00027 USD
+ */
 const exchangeRates: Record<Currency, number> = {
-  UGX: 1,
-  USD: 0.00027,
-  KES: 0.041,
-  TZS: 0.63,
-  RWF: 0.32,
+  [Currency.UGX]: 1,
+  [Currency.USD]: 0.00027,
+  [Currency.KES]: 0.041,
+  [Currency.TZS]: 0.63,
+  [Currency.RWF]: 0.32,
 };
 
+/**
+ * CurrencyConverter Component
+ * 
+ * Converts property prices between different currencies based on:
+ * - User's detected location (via IP)
+ * - Stored preference in cookies
+ * - Fallback to USD if detection fails
+ * 
+ * Features:
+ * - Automatic currency detection
+ * - Persistent currency preference
+ * - Real-time conversion
+ * - Proper currency formatting
+ * 
+ * @param {CurrencyConverterProps} props - Component props
+ * @returns {JSX.Element} Formatted currency amount in user's preferred currency
+ */
 export function CurrencyConverter({
   amount,
   fromCurrency,
   className = '',
 }: CurrencyConverterProps) {
-  const [userCurrency, setUserCurrency] = useState<Currency>('UGX');
+  const [userCurrency, setUserCurrency] = useState<Currency>(Currency.UGX);
   const [convertedAmount, setConvertedAmount] = useState(amount);
 
   useEffect(() => {
@@ -35,7 +81,7 @@ export function CurrencyConverter({
           .find(row => row.startsWith('userCurrency='))
           ?.split('=')[1] as Currency;
 
-        if (storedCurrency) {
+        if (storedCurrency && Object.values(Currency).includes(storedCurrency)) {
           setUserCurrency(storedCurrency);
           return;
         }
@@ -46,20 +92,20 @@ export function CurrencyConverter({
         
         // Map country codes to currencies
         const countryToCurrency: Record<string, Currency> = {
-          UG: 'UGX',
-          KE: 'KES',
-          TZ: 'TZS',
-          RW: 'RWF',
+          UG: Currency.UGX,
+          KE: Currency.KES,
+          TZ: Currency.TZS,
+          RW: Currency.RWF,
         };
 
-        const detectedCurrency = countryToCurrency[data.country_code] || 'USD';
+        const detectedCurrency = countryToCurrency[data.country_code] || Currency.USD;
         setUserCurrency(detectedCurrency);
 
         // Store in cookies for 30 days
         document.cookie = `userCurrency=${detectedCurrency};max-age=${30 * 24 * 60 * 60};path=/`;
       } catch (error) {
         console.error('Error detecting user location:', error);
-        setUserCurrency('USD');
+        setUserCurrency(Currency.USD);
       }
     };
 
@@ -72,7 +118,14 @@ export function CurrencyConverter({
     setConvertedAmount(converted);
   }, [amount, fromCurrency, userCurrency]);
 
-  const formatCurrency = (amount: number, currency: Currency) => {
+  /**
+   * Formats a number as currency using the browser's Intl API
+   * 
+   * @param {number} amount - The amount to format
+   * @param {Currency} currency - The currency code
+   * @returns {string} Formatted currency string
+   */
+  const formatCurrency = (amount: number, currency: Currency): string => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency,

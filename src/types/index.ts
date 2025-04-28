@@ -1,3 +1,5 @@
+import { Currency } from './property';
+
 export type UserRole = 'client' | 'landlord' | 'broker' | 'admin';
 
 export interface User {
@@ -25,6 +27,7 @@ export interface Property {
     };
   };
   features: {
+    parkingSpaces: number;
     bedrooms: number;
     bathrooms: number;
     area: number;
@@ -44,7 +47,7 @@ export interface Transaction {
   propertyId: string;
   userId: string;
   amount: number;
-  currency: string;
+  currency: Currency;
   status: 'pending' | 'completed' | 'failed';
   paymentMethod: 'stripe' | 'paypal' | 'mobile_money';
   createdAt: Date;
@@ -65,7 +68,7 @@ export interface Wallet {
   id: string;
   userId: string;
   balance: number;
-  currency: string;
+  currency: Currency;
   transactions: Transaction[];
   createdAt: Date;
   updatedAt: Date;
