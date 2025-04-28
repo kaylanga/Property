@@ -33,7 +33,45 @@ export interface APIErrorResponse {
     message: string;
     code: string;
     statusCode: number;
-    details?: unknown;
+import { NextResponse } from 'next/server';
+import { RateLimitError } from '../lib/api-error-handler';
+interface RateLimitConfig {
+  windowMs: number;
+  maxRequests: number;
+}
+const defaultConfig: RateLimitConfig = {
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  maxRequests: 100 // limit each IP to 100 requests per windowMs
+};
+const ipRequests = new Map<string, { count: number; resetTime: number }>();
+export function rateLimit(config: Partial<RateLimitConfig> = {}) {
+  const { windowMs, maxRequests } = { ...defaultConfig, ...config };
+  return async function rateLimitMiddleware(req: Request) {
+    const ip = req.headers.get('x-forwarded-for') || 'unknown';
+    const now = Date.now();
+    
+    const requestInfo = ipRequests.get(ip) || { count: 0, resetTime: now + windowMs };
+    
+    // Reset count if window has expired
+    if (now > requestInfo.resetTime) {
+      requestInfo.count = 0;
+      requestInfo.resetTime = now + windowMs;
+    }
+    requestInfo.count++;
+    ipRequests.set(ip, requestInfo);
+    if (requestInfo.count > maxRequests) {
+      throw new RateLimitError('Too many requests, please try again later', {
+        retryAfter: Math.ceil((requestInfo.resetTime - now) / 1000)
+      });
+    }
+    const response = NextResponse.next();
+    response.headers.set('X-RateLimit-Limit', maxRequests.toString());
+    response.headers.set('X-RateLimit-Remaining', (maxRequests - requestInfo.count).toString());
+    response.headers.set('X-RateLimit-Reset', Math.ceil(requestInfo.resetTime / 1000).toString());
+    
+    return response;
+  };
+}
   };
 }
 

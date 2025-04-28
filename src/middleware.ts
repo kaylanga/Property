@@ -12,17 +12,195 @@ const MAX_URL_LENGTH = 2048
 // Maximum header size (8KB)
 const MAX_HEADER_SIZE = 8 * 1024
 
-export async function middleware(request: NextRequest) {
-  try {
-    // Check URL length
-    if (request.url.length > MAX_URL_LENGTH) {
-      return handleVercelError({
-        code: 'URL_TOO_LONG',
-        message: 'URL length exceeds maximum allowed length',
-        statusCode: 414
-      })
+import { ValidationError } from './api-error-handler';
+interface ValidationRule {
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: RegExp;
+  custom?: (value: any) => boolean | string;
+}
+interface ValidationSchema {
+  [key: string]: ValidationRule;
+}
+export function validateForm(data: any, schema: ValidationSchema) {
+  const errors: { [key: string]: string } = {};
+  for (const [field, rules] of Object.entries(schema)) {
+    const value = data[field];
+    // Required check
+    if (rules.required && (!value || value.toString().trim() === '')) {
+      errors[field] = `${field} is required`;
+      continue;
     }
-
+    if (value) {
+      // String length checks
+      if (typeof value === 'string') {
+        if (rules.minLength && value.length < rules.minLength) {
+          errors[field] = `${field} must be at least ${rules.minLength} characters`;
+        }
+        if (rules.maxLength && value.length > rules.maxLength) {
+          errors[field] = `${field} must not exceed ${rules.maxLength} characters`;
+        }
+      }
+      // Pattern check
+      if (rules.pattern && !rules.pattern.test(value)) {
+        errors[field] = `${field} format is invalid`;
+      }
+      // Custom validation
+      if (rules.custom) {
+        const result = rules.custom(value);
+        if (result !== true) {
+          errors[field] = typeof result === 'string' ? result : `${field} is invalid`;
+        }
+      }
+    }
+  }
+  if (Object.keys(errors).length > 0) {
+    throw new ValidationError('Validation failed', errors);
+  }
+  return true;
+}
+// Common validation schemas
+export const validationSchemas = {
+  registration: {
+    email: {
+      required: true,
+      pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      maxLength: 255
+    },
+    password: {
+      required: true,
+      minLength: 8,
+      maxLength: 100,
+      pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/
+    },
+    fullName: {
+      required: true,
+      minLength: 2,
+      maxLength: 100,
+      pattern: /^[a-zA-Z\s'-]+$/
+    }
+  },
+  propertyCreation: {
+    title: {
+      required: true,
+      minLength: 10,
+      maxLength: 200
+    },
+    description: {
+      required: true,
+      minLength: 50,
+      maxLength: 2000
+    },
+    price: {
+      required: true,
+      custom: (value: number) => value > 0 || 'Price must be greater than 0'
+    },
+    location: {
+      required: true,
+      custom: (value: any) => 
+        value.city && value.country || 'Location must include city and country'
+    }
+  }
+};
+interface ValidationRule {
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: RegExp;
+  custom?: (value: any) => boolean | string;
+}
+interface ValidationSchema {
+  [key: string]: ValidationRule;
+}
+export function validateForm(data: any, schema: ValidationSchema) {
+  const errors: { [key: string]: string } = {};
+  for (const [field, rules] of Object.entries(schema)) {
+    const value = data[field];
+    // Required check
+    if (rules.required && (!value || value.toString().trim() === '')) {
+      errors[field] = `${field} is required`;
+      continue;
+    }
+    if (value) {
+      // String length checks
+      if (typeof value === 'string') {
+        if (rules.minLength && value.length < rules.minLength) {
+          errors[field] = `${field} must be at least ${rules.minLength} characters`;
+        }
+        if (rules.maxLength && value.length > rules.maxLength) {
+          errors[field] = `${field} must not exceed ${rules.maxLength} characters`;
+        }
+      }
+      // Pattern check
+      if (rules.pattern && !rules.pattern.test(value)) {
+        errors[field] = `${field} format is invalid`;
+      }
+      // Custom validation
+      if (rules.custom) {
+        const result = rules.custom(value);
+        if (result !== true) {
+          errors[field] = typeof result === 'string' ? result : `${field} is invalid`;
+        }
+      }
+    }
+  }
+  if (Object.keys(errors).length > 0) {
+    throw new ValidationError('Validation failed', errors);
+  }
+  return true;
+}
+// Common validation schemas
+export const validationSchemas = {
+  registration: {
+    email: {
+      required: true,
+      pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      maxLength: 255
+    },
+    password: {
+      required: true,
+      minLength: 8,
+      maxLength: 100,
+      pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/
+    },
+    fullName: {
+      required: true,
+      minLength: 2,
+      maxLength: 100,
+      pattern: /^[a-zA-Z\s'-]+$/
+    }
+  },
+  propertyCreation: {
+    title: {
+      required: true,
+      minLength: 10,
+      maxLength: 200
+    },
+    description: {
+      required: true,
+      minLength: 50,
+      maxLength: 2000
+    },
+    price: {
+      required: true,
+      custom: (value: number) => value > 0 || 'Price must be greater than 0'
+    },
+    location: {
+      required: true,
+      custom: (value: any) => 
+        value.city && value.country || 'Location must include city and country'
+    }
+  }
+};
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  maxRequests: 100 // limit each IP to 100 requests per windowMs
+});
+const authLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  maxRequests: 5 // limit each IP to 5 login attempts per hour
+});
     // Check request headers size
     const headersSize = Object.entries(request.headers).reduce(
       (size, [key, value]) => size + key.length + (value?.length || 0),
@@ -59,14 +237,14 @@ export async function middleware(request: NextRequest) {
     }
 
     // Add security headers
-    const response = NextResponse.next()
-    response.headers.set('X-DNS-Prefetch-Control', 'on')
-    response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
-    response.headers.set('X-XSS-Protection', '1; mode=block')
-    response.headers.set('X-Frame-Options', 'SAMEORIGIN')
-    response.headers.set('X-Content-Type-Options', 'nosniff')
-    response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
-
+    const response = NextResponse.next();
+    response.headers.set('X-DNS-Prefetch-Control', 'on');
+    response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+    response.headers.set('X-XSS-Protection', '1; mode=block');
+    response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     // Check if environment variables are set
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY

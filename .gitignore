@@ -13,6 +13,10 @@
 # production
 /build
 
+# mock data
+/src/data/mock/
+/src/data/*.ts
+
 # misc
 .DS_Store
 *.pem
@@ -32,6 +36,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+tsconfig.tsbuildinfo
 
 # IDE
 .vscode/

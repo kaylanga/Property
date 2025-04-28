@@ -43,8 +43,10 @@ function PaymentFormContent({
 
   const handleCardPayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!stripe || !elements) return;
-
+    if (!stripe || !elements) {
+      onError('Payment processing unavailable. Please try again later.');
+      return;
+    }
     setLoading(true);
 
     try {
