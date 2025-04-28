@@ -10,7 +10,7 @@ export interface VercelError {
 }
 
 // Map error codes to their corresponding HTTP status codes
-const errorStatusCodes: Record<VercelErrorCode, number> = {
+const errorStatusCodes: Record<string, number> = {
   // Function Errors
   BODY_NOT_A_STRING_FROM_FUNCTION: 502,
   MIDDLEWARE_INVOCATION_FAILED: 500,
@@ -97,17 +97,17 @@ const errorStatusCodes: Record<VercelErrorCode, number> = {
   INTERNAL_MICROFRONTENDS_UNEXPECTED_ERROR: 500
 };
 
-export function handleVercelError(error: VercelError): Response {
-  return new Response(JSON.stringify({
-    error: error.message,
-    code: error.code,
-    details: error.details
-  }), {
-    status: error.statusCode || 500,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
+export function handleVercelError(error: VercelError): NextResponse {
+  const statusCode = error.statusCode || errorStatusCodes[error.code] || 500;
+  
+  return NextResponse.json(
+    { 
+      error: error.message,
+      code: error.code,
+      details: error.details
+    },
+    { status: statusCode }
+  );
 }
 
 export function isVercelError(error: unknown): error is VercelError {
@@ -120,7 +120,7 @@ export function isVercelError(error: unknown): error is VercelError {
 }
 
 export function getErrorMessage(code: VercelErrorCode): string {
-  const errorMessages: Record<VercelErrorCode, string> = {
+  const errorMessages: Record<string, string> = {
     // Function Errors
     BODY_NOT_A_STRING_FROM_FUNCTION: 'Function returned invalid response type',
     MIDDLEWARE_INVOCATION_FAILED: 'Middleware execution failed',
