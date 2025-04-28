@@ -1,10 +1,38 @@
+/**
+ * Property Search Component
+ * 
+ * A comprehensive property search interface that allows users to:
+ * - Search properties by location, features, or description
+ * - Filter properties by various criteria
+ * - Get AI-powered property recommendations
+ * - View property listings in a responsive grid layout
+ * 
+ * Features:
+ * - Real-time search with Supabase integration
+ * - AI-powered recommendations based on property features
+ * - Responsive grid layout for property cards
+ * - Advanced filtering options
+ * - Location-based search for major Ugandan cities
+ * 
+ * @module property-search
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { supabase } from '../../lib/supabase';
-import type { Property } from '../../types';
+import type { Property } from '../../types/property';
 
+/**
+ * Search filters interface defining all available filter options
+ * @interface SearchFilters
+ * @property {string} [location] - City or location to filter by
+ * @property {[number, number]} [priceRange] - Min and max price range
+ * @property {string[]} [propertyType] - Types of properties to include
+ * @property {string[]} [features] - Property features to filter by
+ * @property {boolean} [aiRecommendations] - Whether to show AI recommendations
+ */
 interface SearchFilters {
   location?: string;
   priceRange?: [number, number];
@@ -13,12 +41,25 @@ interface SearchFilters {
   aiRecommendations?: boolean;
 }
 
+/**
+ * PropertySearch Component
+ * 
+ * Main component for searching and filtering properties with AI recommendations.
+ * Integrates with Supabase for data fetching and implements a scoring system
+ * for AI-powered property recommendations.
+ * 
+ * @returns {JSX.Element} Property search interface with filters and results
+ */
 export function PropertySearch() {
   const [filters, setFilters] = useState<SearchFilters>({
     aiRecommendations: true,
   });
   const [searchQuery, setSearchQuery] = useState('');
 
+  /**
+   * Fetch properties from Supabase based on current filters
+   * Uses React Query for caching and automatic updates
+   */
   const { data: properties, isLoading } = useQuery(
     ['properties', filters],
     async () => {
@@ -46,12 +87,14 @@ export function PropertySearch() {
 
   const [aiRecommendations, setAiRecommendations] = useState<Property[]>([]);
 
+  /**
+   * Update AI recommendations when filters or properties change
+   * Implements a simple scoring system based on property features
+   */
   useEffect(() => {
     if (filters.aiRecommendations && properties) {
-      // Simulate AI recommendations based on user preferences and property features
       const recommendedProperties = properties
         .sort((a, b) => {
-          // Simple scoring system based on property features
           const scoreA = calculatePropertyScore(a);
           const scoreB = calculatePropertyScore(b);
           return scoreB - scoreA;
@@ -62,6 +105,13 @@ export function PropertySearch() {
     }
   }, [filters.aiRecommendations, properties]);
 
+  /**
+   * Calculate a score for a property based on its features
+   * Used to rank properties for AI recommendations
+   * 
+   * @param {Property} property - The property to score
+   * @returns {number} Score based on property features
+   */
   const calculatePropertyScore = (property: Property) => {
     let score = 0;
     
@@ -69,7 +119,7 @@ export function PropertySearch() {
     if (property.features.bedrooms >= 3) score += 2;
     if (property.features.bathrooms >= 2) score += 2;
     if (property.features.parkingSpaces >= 1) score += 1;
-    if (property.features.amenities.includes('furnished')) score += 1;
+    if (property.features.hasSmartHome) score += 1;
     
     return score;
   };
@@ -171,11 +221,24 @@ export function PropertySearch() {
   );
 }
 
+/**
+ * PropertyCard Component
+ * 
+ * Displays a single property in a card format with:
+ * - Property image
+ * - Title and location
+ * - Price
+ * - Key features (bedrooms, bathrooms)
+ * 
+ * @param {Object} props - Component props
+ * @param {Property} props.property - The property to display
+ * @returns {JSX.Element} Property card with property details
+ */
 function PropertyCard({ property }: { property: Property }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
       <img
-        src={property.images[0]}
+        src={property.media.images[0].url}
         alt={property.title}
         className="w-full h-48 object-cover"
       />
@@ -183,7 +246,7 @@ function PropertyCard({ property }: { property: Property }) {
         <h3 className="text-lg font-semibold">{property.title}</h3>
         <p className="text-gray-600 dark:text-gray-400">{property.location.address}</p>
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-xl font-bold">${property.price.toLocaleString()}</span>
+          <span className="text-xl font-bold">${property.pricing.listPrice.toLocaleString()}</span>
           <span className="text-sm text-gray-500">
             {property.features.bedrooms} beds • {property.features.bathrooms} baths
           </span>

@@ -1,13 +1,48 @@
+/**
+ * Authentication Popup Component
+ * 
+ * A modal dialog component that handles user authentication, providing:
+ * - User login functionality
+ * - User registration with name, email, and password
+ * - Error handling and loading states
+ * - Automatic session checking
+ * - Responsive design with dark mode support
+ * 
+ * Features:
+ * - Toggle between login and registration modes
+ * - Form validation
+ * - Supabase authentication integration
+ * - Automatic redirect after successful auth
+ * - Error message display
+ * - Loading state handling
+ * 
+ * @module auth-popup
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 
+/**
+ * Props for the AuthPopup component
+ * @interface AuthPopupProps
+ * @property {() => void} onClose - Callback function to close the popup
+ */
 interface AuthPopupProps {
   onClose: () => void;
 }
 
+/**
+ * AuthPopup Component
+ * 
+ * A modal dialog that provides authentication functionality using Supabase.
+ * Supports both login and registration with a clean, user-friendly interface.
+ * 
+ * @param {AuthPopupProps} props - Component props
+ * @returns {JSX.Element} Authentication modal dialog
+ */
 export function AuthPopup({ onClose }: AuthPopupProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -17,8 +52,11 @@ export function AuthPopup({ onClose }: AuthPopupProps) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  /**
+   * Check if user is already logged in when component mounts
+   * Closes popup if a valid session exists
+   */
   useEffect(() => {
-    // Check if user is already logged in
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
@@ -28,6 +66,11 @@ export function AuthPopup({ onClose }: AuthPopupProps) {
     checkUser();
   }, [onClose]);
 
+  /**
+   * Handle form submission for both login and registration
+   * 
+   * @param {React.FormEvent} e - Form submission event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);

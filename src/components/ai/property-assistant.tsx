@@ -1,28 +1,84 @@
+/**
+ * Property Assistant Component
+ * 
+ * An AI-powered chat interface that helps users with property-related queries.
+ * Features:
+ * - Real-time chat interface
+ * - Property recommendations
+ * - Price information
+ * - Location details
+ * - Feature descriptions
+ * 
+ * The assistant can:
+ * - Answer general property questions
+ * - Provide price averages
+ * - List available locations
+ * - Describe property features
+ * - Recommend properties based on user input
+ * 
+ * @module property-assistant
+ */
+
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { supabase } from '../../lib/supabase';
-import type { Property } from '../../types';
+import { Property as PropertyType } from '../../types/property';
 
+/**
+ * Message interface for chat messages
+ * @interface Message
+ * @property {'user' | 'assistant'} role - The sender of the message
+ * @property {string} content - The message content
+ * @property {Date} timestamp - When the message was sent
+ */
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
 }
 
+interface PropertyLocation {
+  city: string;
+  state: string;
+  country: string;
+}
+
+/**
+ * PropertyAssistant Component
+ * 
+ * A chat interface that provides AI-powered assistance for property-related queries.
+ * Integrates with Supabase for property data and implements a simple AI response system.
+ * 
+ * Features:
+ * - Real-time chat with typing indicators
+ * - Automatic scrolling to latest messages
+ * - Property data integration
+ * - Contextual responses
+ * - Dark mode support
+ * 
+ * @returns {JSX.Element} The property assistant chat interface
+ */
 export function PropertyAssistant() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * Fetch properties from Supabase
+   * Uses React Query for caching and automatic updates
+   */
   const { data: properties } = useQuery('properties', async () => {
     const { data, error } = await supabase.from('properties').select('*');
     if (error) throw error;
-    return data as Property[];
+    return data as PropertyType[];
   });
 
+  /**
+   * Scroll chat window to the latest message
+   */
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -31,6 +87,10 @@ export function PropertyAssistant() {
     scrollToBottom();
   }, [messages]);
 
+  /**
+   * Handle sending a new message
+   * Adds user message and generates AI response
+   */
   const handleSendMessage = async () => {
     if (!input.trim()) return;
 
@@ -57,7 +117,14 @@ export function PropertyAssistant() {
     }, 1000);
   };
 
-  const generateAIResponse = (userInput: string, properties: Property[]): string => {
+  /**
+   * Generate AI response based on user input and available properties
+   * 
+   * @param {string} userInput - The user's message
+   * @param {Property[]} properties - Available properties
+   * @returns {string} The AI's response
+   */
+  const generateAIResponse = (userInput: string, properties: PropertyType[]): string => {
     const input = userInput.toLowerCase();
 
     // Basic response patterns
@@ -66,13 +133,13 @@ export function PropertyAssistant() {
     }
 
     if (input.includes('price') || input.includes('cost')) {
-      const avgPrice = properties.reduce((sum, p) => sum + p.price, 0) / properties.length;
+      const avgPrice = properties.reduce((sum, p) => sum + p.pricing.listPrice, 0) / properties.length;
       return `The average property price is $${avgPrice.toLocaleString()}. Would you like to see properties within a specific price range?`;
     }
 
     if (input.includes('location') || input.includes('where')) {
-      const locations = [...new Set(properties.map(p => p.location.city))];
-      return `We have properties in ${locations.join(', ')}. Which location interests you?`;
+      const uniqueLocations = Array.from(new Set(properties.map(p => p.location.city)));
+      return `We have properties in ${uniqueLocations.join(', ')}. Which location interests you?`;
     }
 
     if (input.includes('feature') || input.includes('amenity')) {

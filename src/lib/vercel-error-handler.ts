@@ -1,7 +1,28 @@
+/**
+ * Vercel Error Handler
+ * 
+ * This module provides utilities for handling Vercel-specific errors in a Next.js application.
+ * It includes type definitions, error code mappings, and helper functions for consistent error handling.
+ * 
+ * @module vercel-error-handler
+ */
+
 import { NextResponse } from 'next/server';
 
+/**
+ * Type definition for Vercel error codes
+ * These codes are used to identify specific types of errors that can occur in a Vercel deployment
+ */
 export type VercelErrorCode = string;
 
+/**
+ * Interface representing a Vercel error
+ * @interface VercelError
+ * @property {VercelErrorCode} code - The error code identifying the type of error
+ * @property {string} message - Human-readable error message
+ * @property {any} [details] - Optional additional error details
+ * @property {number} [statusCode] - Optional HTTP status code
+ */
 export interface VercelError {
   code: VercelErrorCode;
   message: string;
@@ -9,9 +30,12 @@ export interface VercelError {
   statusCode?: number;
 }
 
-// Map error codes to their corresponding HTTP status codes
+/**
+ * Maps Vercel error codes to their corresponding HTTP status codes
+ * This mapping ensures consistent error responses across the application
+ */
 const errorStatusCodes: Record<string, number> = {
-  // Function Errors
+  // Function Errors - Related to serverless function execution
   BODY_NOT_A_STRING_FROM_FUNCTION: 502,
   MIDDLEWARE_INVOCATION_FAILED: 500,
   MIDDLEWARE_INVOCATION_TIMEOUT: 504,
@@ -24,7 +48,7 @@ const errorStatusCodes: Record<string, number> = {
   FUNCTION_THROTTLED: 503,
   NO_RESPONSE_FROM_FUNCTION: 502,
   
-  // Deployment Errors
+  // Deployment Errors - Related to Vercel deployment issues
   DEPLOYMENT_BLOCKED: 403,
   DEPLOYMENT_PAUSED: 503,
   DEPLOYMENT_DISABLED: 402,
@@ -32,14 +56,14 @@ const errorStatusCodes: Record<string, number> = {
   DEPLOYMENT_DELETED: 410,
   DEPLOYMENT_NOT_READY_REDIRECTING: 303,
   
-  // DNS Errors
+  // DNS Errors - Related to domain and DNS resolution
   DNS_HOSTNAME_EMPTY: 502,
   DNS_HOSTNAME_NOT_FOUND: 502,
   DNS_HOSTNAME_RESOLVE_FAILED: 502,
   DNS_HOSTNAME_RESOLVED_PRIVATE: 404,
   DNS_HOSTNAME_SERVER_ERROR: 502,
   
-  // Routing Errors
+  // Routing Errors - Related to request routing and handling
   TOO_MANY_FORKS: 502,
   TOO_MANY_FILESYSTEM_CHECKS: 502,
   ROUTER_CANNOT_MATCH: 502,
@@ -48,14 +72,14 @@ const errorStatusCodes: Record<string, number> = {
   ROUTER_TOO_MANY_HAS_SELECTIONS: 502,
   ROUTER_EXTERNAL_TARGET_HANDSHAKE_ERROR: 502,
   
-  // Request Errors
+  // Request Errors - Related to HTTP request validation
   INVALID_REQUEST_METHOD: 405,
   MALFORMED_REQUEST_HEADER: 400,
   REQUEST_HEADER_TOO_LARGE: 431,
   RESOURCE_NOT_FOUND: 404,
   URL_TOO_LONG: 414,
   
-  // Range Errors
+  // Range Errors - Related to HTTP range requests
   RANGE_END_NOT_VALID: 416,
   RANGE_GROUP_NOT_VALID: 416,
   RANGE_MISSING_UNIT: 416,
@@ -63,17 +87,17 @@ const errorStatusCodes: Record<string, number> = {
   RANGE_UNIT_NOT_SUPPORTED: 416,
   TOO_MANY_RANGES: 416,
   
-  // Image Errors
+  // Image Errors - Related to image optimization
   INVALID_IMAGE_OPTIMIZE_REQUEST: 400,
   OPTIMIZED_EXTERNAL_IMAGE_REQUEST_FAILED: 502,
   OPTIMIZED_EXTERNAL_IMAGE_REQUEST_INVALID: 502,
   OPTIMIZED_EXTERNAL_IMAGE_REQUEST_UNAUTHORIZED: 502,
   OPTIMIZED_EXTERNAL_IMAGE_TOO_MANY_REDIRECTS: 502,
   
-  // Cache Errors
+  // Cache Errors - Related to caching issues
   FALLBACK_BODY_TOO_LARGE: 502,
   
-  // Internal Platform Errors
+  // Internal Platform Errors - Related to Vercel platform issues
   INTERNAL_EDGE_FUNCTION_INVOCATION_FAILED: 500,
   INTERNAL_EDGE_FUNCTION_INVOCATION_TIMEOUT: 500,
   INTERNAL_FUNCTION_INVOCATION_FAILED: 500,
@@ -97,6 +121,11 @@ const errorStatusCodes: Record<string, number> = {
   INTERNAL_MICROFRONTENDS_UNEXPECTED_ERROR: 500
 };
 
+/**
+ * Handles a Vercel error by creating an appropriate NextResponse
+ * @param {VercelError} error - The Vercel error to handle
+ * @returns {NextResponse} A NextResponse with the error details and appropriate status code
+ */
 export function handleVercelError(error: VercelError): NextResponse {
   const statusCode = error.statusCode || errorStatusCodes[error.code] || 500;
 
@@ -110,6 +139,11 @@ export function handleVercelError(error: VercelError): NextResponse {
   );
 }
 
+/**
+ * Type guard to check if an unknown error is a VercelError
+ * @param {unknown} error - The error to check
+ * @returns {boolean} True if the error is a VercelError
+ */
 export function isVercelError(error: unknown): error is VercelError {
   if (!error || typeof error !== 'object') return false;
   const err = error as any;
@@ -119,6 +153,11 @@ export function isVercelError(error: unknown): error is VercelError {
   );
 }
 
+/**
+ * Gets a human-readable error message for a given error code
+ * @param {VercelErrorCode} code - The error code to get the message for
+ * @returns {string} A human-readable error message
+ */
 export function getErrorMessage(code: VercelErrorCode): string {
   const errorMessages: Record<string, string> = {
     // Function Errors

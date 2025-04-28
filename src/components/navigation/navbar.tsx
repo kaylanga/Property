@@ -1,3 +1,22 @@
+/**
+ * Navigation Bar Component
+ * 
+ * A responsive navigation bar that provides:
+ * - Main navigation links
+ * - Theme switching (dark/light mode)
+ * - Authentication links
+ * - Mobile-friendly menu
+ * 
+ * Features:
+ * - Responsive design with mobile menu
+ * - Dark mode support with theme toggle
+ * - Fixed positioning with proper z-index
+ * - Smooth transitions and hover effects
+ * - Accessible navigation structure
+ * 
+ * @module navbar
+ */
+
 'use client';
 
 import Link from 'next/link';
@@ -5,6 +24,24 @@ import { useState } from 'react';
 import { useTheme } from 'next-themes';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 
+/**
+ * Navbar Component
+ * 
+ * The main navigation component that provides:
+ * - Brand logo and name
+ * - Navigation links (Properties, About, Contact)
+ * - Theme toggle button
+ * - Authentication links (Login, Register)
+ * - Responsive mobile menu
+ * 
+ * The component uses:
+ * - next-themes for theme management
+ * - Heroicons for theme toggle icons
+ * - Tailwind CSS for styling
+ * - Next.js Link component for navigation
+ * 
+ * @returns {JSX.Element} The navigation bar with all its features
+ */
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
