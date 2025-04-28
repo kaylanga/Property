@@ -6,8 +6,15 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { FaGoogle, FaGithub, FaFacebook } from 'react-icons/fa';
-import { zxcvbn } from '@zxcvbn-ts/language-common';
-import { zxcvbnOptions } from '@zxcvbn-ts/language-en';
+import { zxcvbn, ZxcvbnResult } from '@zxcvbn-ts/core';
+import * as zxcvbnCommonPackage from '@zxcvbn-ts/language-common';
+import * as zxcvbnEnPackage from '@zxcvbn-ts/language-en';
+
+// Create user inputs array for zxcvbn
+const userInputs = [
+  ...Object.values(zxcvbnCommonPackage.dictionary).flat(),
+  ...Object.values(zxcvbnEnPackage.dictionary).flat(),
+];
 
 export default function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -27,7 +34,7 @@ export default function SignUpForm() {
 
   useEffect(() => {
     if (formData.password) {
-      const result = zxcvbn(formData.password, [], zxcvbnOptions);
+      const result: ZxcvbnResult = zxcvbn(formData.password, userInputs);
       setPasswordStrength(result.score);
       setPasswordFeedback(result.feedback.warning || '');
     }
@@ -99,8 +106,12 @@ export default function SignUpForm() {
 
       toast.success('Check your email for the confirmation link!');
       router.push('/login');
-    } catch (error) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('An error occurred during sign up');
+      }
     } finally {
       setLoading(false);
     }

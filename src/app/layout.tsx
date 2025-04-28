@@ -1,14 +1,15 @@
 import React from 'react';
-import type { Metadata } from 'next';
+import { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { MainLayout } from '../components/layout/main-layout';
+import { MainLayout } from '@/components/layout/main-layout';
+import { Providers } from '@/providers/providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Property Africa',
-  description: 'Find your dream property in Africa',
+  description: 'Your trusted partner in African real estate',
 };
 
 export default function RootLayout({
@@ -19,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <MainLayout>{children}</MainLayout>
+        <Providers>
+          <MainLayout>{children}</MainLayout>
+        </Providers>
       </body>
     </html>
   );

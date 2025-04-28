@@ -6,13 +6,12 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['localhost', 'your-supabase-project.supabase.co'],
+    domains: ['localhost', 'cxxbjayvaszebgmyaao.supabase.co'],
     formats: ['image/avif', 'image/webp'],
   },
   experimental: {
     optimizeCss: true,
     scrollRestoration: true,
-    serverActions: true,
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',

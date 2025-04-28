@@ -71,7 +71,7 @@ export function PropertyAssistant() {
     }
 
     if (input.includes('location') || input.includes('where')) {
-      const locations = [...new Set(properties.map(p => p.location.city))];
+      const locations = Array.from(new Set(properties.map(p => p.location.city)));
       return `We have properties in ${locations.join(', ')}. Which location interests you?`;
     }
 
@@ -87,7 +87,9 @@ export function PropertyAssistant() {
 
     if (relevantProperties.length > 0) {
       const property = relevantProperties[0];
-      return `I found a property that might interest you: ${property.title} in ${property.location.city}. It's a ${property.type} with ${property.features.bedrooms} bedrooms and ${property.features.bathrooms} bathrooms. Would you like to see more details?`;
+      if (property && property.title && property.location && property.type && property.features) {
+        return `I found a property that might interest you: ${property.title} in ${property.location.city}. It's a ${property.type} with ${property.features.bedrooms} bedrooms and ${property.features.bathrooms} bathrooms. Would you like to see more details?`;
+      }
     }
 
     return "I'm not sure I understand. Could you please rephrase your question? I can help you with property searches, price information, locations, and features.";

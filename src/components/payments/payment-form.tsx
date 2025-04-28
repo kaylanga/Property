@@ -22,11 +22,14 @@ interface PaymentFormProps {
 
 type PaymentMethod = 'card' | 'mobile_money';
 
-const mobileMoneyProviders = {
-  UGX: ['MTN Mobile Money', 'Airtel Money'],
-  KES: ['M-Pesa', 'Airtel Money'],
-  TZS: ['M-Pesa', 'Tigo Pesa'],
-  RWF: ['Mobile Money', 'Airtel Money'],
+type MobileMoneyProviders = {
+  [key in Currency]?: string[];
+};
+
+const mobileMoneyProviders: MobileMoneyProviders = {
+  [Currency.UGX]: ['MTN Mobile Money', 'Airtel Money'],
+  [Currency.KES]: ['M-Pesa', 'Airtel Money'],
+  [Currency.TZS]: ['M-Pesa', 'Tigo Pesa'],
 };
 
 function PaymentFormContent({
@@ -89,6 +92,11 @@ function PaymentFormContent({
     setLoading(true);
 
     try {
+      const providers = mobileMoneyProviders[currency];
+      if (!providers || providers.length === 0) {
+        throw new Error('Mobile money is not available for this currency');
+      }
+
       const response = await fetch('/api/payments/mobile-money', {
         method: 'POST',
         headers: {
@@ -98,7 +106,7 @@ function PaymentFormContent({
           amount,
           currency,
           phoneNumber,
-          provider: mobileMoneyProviders[currency][0], // Default to first provider
+          provider: providers[0], // Default to first provider
         }),
       });
 
@@ -179,7 +187,7 @@ function PaymentFormContent({
               Mobile Money Provider
             </label>
             <select className="w-full px-4 py-2 border rounded-lg">
-              {mobileMoneyProviders[currency].map((provider) => (
+              {mobileMoneyProviders[currency]?.map((provider) => (
                 <option key={provider} value={provider}>
                   {provider}
                 </option>

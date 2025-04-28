@@ -66,10 +66,10 @@ export function PropertySearch() {
     let score = 0;
     
     // Example scoring criteria
-    if (property.features.bedrooms >= 3) score += 2;
-    if (property.features.bathrooms >= 2) score += 2;
-    if (property.features.parkingSpaces >= 1) score += 1;
-    if (property.features.amenities.includes('furnished')) score += 1;
+    if (property.features.bedrooms && property.features.bedrooms >= 3) score += 2;
+    if (property.features.bathrooms && property.features.bathrooms >= 2) score += 2;
+    if (property.features.parking && property.features.parking >= 1) score += 1;
+    if (property.features.furnished) score += 1;
     
     return score;
   };

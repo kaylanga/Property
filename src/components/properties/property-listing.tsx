@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Property } from '@/types/property';
 import { supabase } from '@/lib/supabase';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 interface PropertyListingProps {
   initialFilters?: {
@@ -20,37 +20,43 @@ export const PropertyListing: React.FC<PropertyListingProps> = ({ initialFilters
   const [filters, setFilters] = useState(initialFilters);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: properties, isLoading, error } = useQuery(
-    ['properties', filters],
-    async () => {
+  const { data: properties, isLoading, error } = useQuery({
+    queryKey: ['properties', filters],
+    queryFn: async () => {
       let query = supabase
         .from('properties')
-        .select('*');
+        .select('*')
+        .eq('status', 'AVAILABLE');
 
       if (filters.location) {
         query = query.ilike('location', `%${filters.location}%`);
       }
+
       if (filters.propertyType) {
-        query = query.eq('propertyType', filters.propertyType);
+        query = query.eq('type', filters.propertyType);
       }
+
       if (filters.minPrice) {
         query = query.gte('price', filters.minPrice);
       }
+
       if (filters.maxPrice) {
         query = query.lte('price', filters.maxPrice);
       }
+
       if (filters.bedrooms) {
         query = query.eq('bedrooms', filters.bedrooms);
       }
+
       if (filters.bathrooms) {
         query = query.eq('bathrooms', filters.bathrooms);
       }
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as Property[];
+      return data;
     }
-  );
+  });
 
   const handleFilterChange = (key: string, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -63,7 +69,9 @@ export const PropertyListing: React.FC<PropertyListingProps> = ({ initialFilters
   const filteredProperties = properties?.filter(property =>
     property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     property.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    property.location.toLowerCase().includes(searchQuery.toLowerCase())
+    property.location.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    property.location.district.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    property.location.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (isLoading) return <div className="flex justify-center p-8">Loading properties...</div>;
@@ -135,13 +143,19 @@ export const PropertyListing: React.FC<PropertyListingProps> = ({ initialFilters
             />
             <div className="p-4">
               <h3 className="text-xl font-semibold mb-2">{property.title}</h3>
-              <p className="text-gray-600 mb-2">{property.location}</p>
+              <p className="text-gray-600 mb-2">{property.location.address}, {property.location.city}</p>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-2xl font-bold">${property.price.toLocaleString()}</span>
+                <span className="text-2xl font-bold">
+                  {property.currency} {property.price.toLocaleString()}
+                </span>
                 <div className="flex space-x-2">
-                  <span>{property.bedrooms} beds</span>
-                  <span>{property.bathrooms} baths</span>
-                  <span>{property.size} sq ft</span>
+                  {property.features.bedrooms && (
+                    <span>{property.features.bedrooms} beds</span>
+                  )}
+                  {property.features.bathrooms && (
+                    <span>{property.features.bathrooms} baths</span>
+                  )}
+                  <span>{property.features.area} m²</span>
                 </div>
               </div>
               <p className="text-gray-500 text-sm mb-4">{property.description}</p>

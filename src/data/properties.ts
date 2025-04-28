@@ -45,18 +45,18 @@ const cities = [
 
 // Generate 50 properties
 export const properties: Property[] = Array.from({ length: 50 }, (_, index) => {
-  const type: PropertyType = ['apartment', 'house', 'condo', 'land', 'unfinished'][Math.floor(Math.random() * 5)] as PropertyType;
+  const type = PropertyType.HOUSE;
   const status: PropertyStatus = Math.random() > 0.3 ? 'for-sale' : 'for-rent';
-  const city = cities[Math.floor(Math.random() * cities.length)];
+  const city = cities[Math.floor(Math.random() * cities.length)] || 'Kampala';
+  const amenities = getRandomAmenities();
   
   return {
     id: `prop-${index + 1}`,
-    title: `${type.charAt(0).toUpperCase() + type.slice(1)} for ${status === 'for-rent' ? 'Rent' : 'Sale'} in ${city}`,
+    title: `${type} for ${status === 'for-rent' ? 'Rent' : 'Sale'} in ${city}`,
     description: `Beautiful ${type} located in ${city}. This property offers modern amenities and is perfect for ${status === 'for-rent' ? 'renting' : 'purchasing'}.`,
     type,
-    status,
     price: getRandomPrice(type, status),
-    currency: 'UGX',
+    currency: Currency.UGX,
     location: {
       city,
       district: `${city} District`,
@@ -67,24 +67,39 @@ export const properties: Property[] = Array.from({ length: 50 }, (_, index) => {
       }
     },
     features: {
-      bedrooms: type !== 'land' ? Math.floor(Math.random() * 5) + 1 : undefined,
-      bathrooms: type !== 'land' ? Math.floor(Math.random() * 3) + 1 : undefined,
-      totalArea: Math.floor(Math.random() * 500) + 100,
-      yearBuilt: type !== 'land' ? 2000 + Math.floor(Math.random() * 23) : undefined,
-      floor: type === 'apartment' || type === 'condo' ? Math.floor(Math.random() * 10) + 1 : undefined,
-      totalFloors: type === 'apartment' || type === 'condo' ? Math.floor(Math.random() * 15) + 5 : undefined,
-      parkingSpaces: type !== 'land' ? Math.floor(Math.random() * 3) + 1 : undefined,
-      amenities: getRandomAmenities()
+      bedrooms: Math.floor(Math.random() * 5) + 1,
+      bathrooms: Math.floor(Math.random() * 3) + 1,
+      area: Math.floor(Math.random() * 500) + 100,
+      yearBuilt: 2000 + Math.floor(Math.random() * 23),
+      parking: Math.floor(Math.random() * 3) + 1,
+      furnished: Math.random() > 0.5
     },
+    amenities,
     images: [
-      `https://source.unsplash.com/800x600/?${type},house`,
-      `https://source.unsplash.com/800x600/?${type},interior`,
-      `https://source.unsplash.com/800x600/?${type},exterior`
+      `https://source.unsplash.com/800x600/?house`,
+      `https://source.unsplash.com/800x600/?interior`,
+      `https://source.unsplash.com/800x600/?exterior`
     ],
-    createdAt: new Date(Date.now() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000),
-    updatedAt: new Date(),
-    agentId: `agent-${Math.floor(Math.random() * 10) + 1}`,
-    isVerified: Math.random() > 0.2,
-    isFeatured: Math.random() > 0.8
+    status: 'AVAILABLE',
+    listingType: status === 'for-rent' ? 'RENT' : 'SALE',
+    createdAt: new Date(Date.now() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date().toISOString(),
+    ownerId: `owner-${Math.floor(Math.random() * 10) + 1}`,
+    verified: Math.random() > 0.2,
+    documents: [
+      {
+        title: 'Property Title',
+        url: 'https://example.com/title.pdf',
+        type: 'title_deed'
+      }
+    ],
+    virtualTour: Math.random() > 0.7 ? 'https://example.com/virtual-tour' : undefined,
+    propertyTax: Math.floor(Math.random() * 1000) + 500,
+    maintenanceFee: Math.random() > 0.5 ? Math.floor(Math.random() * 200) + 100 : undefined,
+    propertyCondition: ['new', 'excellent', 'good', 'fair', 'needs_renovation'][Math.floor(Math.random() * 5)] as Property['propertyCondition'],
+    viewingAvailability: {
+      days: ['Monday', 'Wednesday', 'Friday', 'Saturday'],
+      hours: '9:00 AM - 5:00 PM'
+    }
   };
 }); 

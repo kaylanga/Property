@@ -26,8 +26,12 @@ export default function ForgotPasswordForm() {
 
       setSubmitted(true);
       toast.success('Password reset instructions sent to your email');
-    } catch (error) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('An error occurred while resetting the password');
+      }
     } finally {
       setLoading(false);
     }

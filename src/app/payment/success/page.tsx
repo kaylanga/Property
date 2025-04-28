@@ -1,100 +1,87 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'react-hot-toast';
 
-export default function PaymentSuccess() {
+function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
-    const paymentIntent = searchParams.get('payment_intent');
-    const paymentIntentClientSecret = searchParams.get('payment_intent_client_secret');
+    async function handlePaymentSuccess() {
+      if (!sessionId) {
+        toast.error('Invalid payment session');
+        router.push('/');
+        return;
+      }
 
-    if (paymentIntent && paymentIntentClientSecret) {
-      // Verify the payment status
-      fetch('/api/payments/verify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          paymentIntent,
-          paymentIntentClientSecret,
-        }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            setStatus('success');
-          } else {
-            setStatus('error');
-          }
-        })
-        .catch(() => {
-          setStatus('error');
+      try {
+        // Verify the payment with your backend
+        const response = await fetch('/api/verify-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ sessionId }),
         });
-    } else {
-      setStatus('error');
+
+        if (!response.ok) {
+          throw new Error('Payment verification failed');
+        }
+
+        const { subscription } = await response.json();
+
+        // Update the user's subscription status in Supabase
+        const { error } = await supabase
+          .from('subscriptions')
+          .upsert({
+            user_id: subscription.userId,
+            plan_type: subscription.planType,
+            status: 'active',
+            start_date: new Date().toISOString(),
+            end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+          });
+
+        if (error) throw error;
+
+        toast.success('Payment successful! Your subscription is now active.');
+        router.push('/dashboard');
+      } catch (error) {
+        console.error('Error processing payment:', error);
+        toast.error('There was an error processing your payment. Please contact support.');
+        router.push('/');
+      }
     }
-  }, [searchParams]);
 
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-lg">Verifying your payment...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (status === 'error') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-600 text-6xl mb-4">❌</div>
-          <h1 className="text-2xl font-bold mb-4">Payment Failed</h1>
-          <p className="text-gray-600 mb-8">
-            There was an error processing your payment. Please try again.
-          </p>
-          <Link
-            href="/"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-          >
-            Return to Home
-          </Link>
-        </div>
-      </div>
-    );
-  }
+    handlePaymentSuccess();
+  }, [sessionId, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-green-600 text-6xl mb-4">✓</div>
-        <h1 className="text-2xl font-bold mb-4">Payment Successful!</h1>
-        <p className="text-gray-600 mb-8">
-          Thank you for your payment. Your transaction has been completed successfully.
-        </p>
-        <div className="space-y-4">
-          <Link
-            href="/properties"
-            className="block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-          >
-            Browse More Properties
-          </Link>
-          <Link
-            href="/dashboard"
-            className="block text-blue-600 hover:text-blue-700"
-          >
-            Go to Dashboard
-          </Link>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
+        <div className="text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
+            Processing Payment
+          </h2>
+          <p className="text-gray-600">
+            Please wait while we verify your payment...
+          </p>
+          <div className="mt-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-8">Loading...</div>}>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 } 

@@ -5,8 +5,15 @@ import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
-import { zxcvbn } from '@zxcvbn-ts/language-common';
-import { zxcvbnOptions } from '@zxcvbn-ts/language-en';
+import { zxcvbn, ZxcvbnResult } from '@zxcvbn-ts/core';
+import * as zxcvbnCommonPackage from '@zxcvbn-ts/language-common';
+import * as zxcvbnEnPackage from '@zxcvbn-ts/language-en';
+
+// Create user inputs array for zxcvbn
+const userInputs = [
+  ...Object.values(zxcvbnCommonPackage.dictionary).flat(),
+  ...Object.values(zxcvbnEnPackage.dictionary).flat(),
+];
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
@@ -19,7 +26,7 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     if (password) {
-      const result = zxcvbn(password, [], zxcvbnOptions);
+      const result: ZxcvbnResult = zxcvbn(password, userInputs);
       setPasswordStrength(result.score);
       setPasswordFeedback(result.feedback.warning || '');
     }
@@ -52,8 +59,12 @@ export default function ResetPasswordPage() {
 
       toast.success('Password updated successfully');
       router.push('/login');
-    } catch (error) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('An error occurred while updating the password');
+      }
     } finally {
       setLoading(false);
     }

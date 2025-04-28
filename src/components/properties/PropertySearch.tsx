@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { FaSearch, FaFilter } from 'react-icons/fa';
 import { PropertyType } from '@/types/property';
 
 interface PropertySearchProps {
@@ -17,10 +18,9 @@ interface SearchFilters {
   bathrooms: string;
 }
 
-export function PropertySearch({ className }: PropertySearchProps) {
+function PropertySearchContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
   const [filters, setFilters] = useState<SearchFilters>({
     location: searchParams.get('location') || '',
     propertyType: (searchParams.get('propertyType') as PropertyType) || '',
@@ -29,140 +29,133 @@ export function PropertySearch({ className }: PropertySearchProps) {
     bedrooms: searchParams.get('bedrooms') || '',
     bathrooms: searchParams.get('bathrooms') || ''
   });
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFilters(prev => ({ ...prev, [name]: value }));
-  };
+  const [showFilters, setShowFilters] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    const params = new URLSearchParams();
     
-    const searchParams = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value) {
-        searchParams.append(key, value);
+        params.set(key, value);
       }
     });
-    
-    router.push(`/properties?${searchParams.toString()}`);
+
+    router.push(`/properties?${params.toString()}`);
   };
 
   return (
-    <form onSubmit={handleSearch} className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 ${className}`}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-            Location
-          </label>
-          <input
-            type="text"
-            id="location"
-            name="location"
-            value={filters.location}
-            onChange={handleFilterChange}
-            placeholder="Enter city, district or region"
-            className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="propertyType" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-            Property Type
-          </label>
-          <select
-            id="propertyType"
-            name="propertyType"
-            value={filters.propertyType}
-            onChange={handleFilterChange}
-            className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+    <div className="w-full">
+      <form onSubmit={handleSearch} className="space-y-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by location..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={filters.location}
+                onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+              />
+              <FaSearch className="absolute right-3 top-3 text-gray-400" />
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowFilters(!showFilters)}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2"
           >
-            <option value="">All Types</option>
-            <option value="HOUSE">House</option>
-            <option value="APARTMENT">Apartment</option>
-            <option value="LAND">Land</option>
-            <option value="COMMERCIAL">Commercial</option>
-          </select>
+            <FaFilter />
+            Filters
+          </button>
         </div>
 
-        <div className="space-y-2">
-          <label htmlFor="minPrice" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-            Min Price (UGX)
-          </label>
-          <input
-            type="number"
-            id="minPrice"
-            name="minPrice"
-            value={filters.minPrice}
-            onChange={handleFilterChange}
-            placeholder="Minimum price"
-            className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        {showFilters && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Property Type
+              </label>
+              <select
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={filters.propertyType}
+                onChange={(e) => setFilters({ ...filters, propertyType: e.target.value as PropertyType })}
+              >
+                <option value="">All Types</option>
+                <option value="HOUSE">House</option>
+                <option value="APARTMENT">Apartment</option>
+                <option value="LAND">Land</option>
+                <option value="COMMERCIAL">Commercial</option>
+              </select>
+            </div>
 
-        <div className="space-y-2">
-          <label htmlFor="maxPrice" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-            Max Price (UGX)
-          </label>
-          <input
-            type="number"
-            id="maxPrice"
-            name="maxPrice"
-            value={filters.maxPrice}
-            onChange={handleFilterChange}
-            placeholder="Maximum price"
-            className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Price Range
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  className="w-1/2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={filters.minPrice}
+                  onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+                />
+                <input
+                  type="number"
+                  placeholder="Max"
+                  className="w-1/2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={filters.maxPrice}
+                  onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+                />
+              </div>
+            </div>
 
-        <div className="space-y-2">
-          <label htmlFor="bedrooms" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-            Bedrooms
-          </label>
-          <select
-            id="bedrooms"
-            name="bedrooms"
-            value={filters.bedrooms}
-            onChange={handleFilterChange}
-            className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Any</option>
-            <option value="1">1+</option>
-            <option value="2">2+</option>
-            <option value="3">3+</option>
-            <option value="4">4+</option>
-            <option value="5">5+</option>
-          </select>
-        </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Bedrooms
+              </label>
+              <input
+                type="number"
+                min="0"
+                placeholder="Any"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={filters.bedrooms}
+                onChange={(e) => setFilters({ ...filters, bedrooms: e.target.value })}
+              />
+            </div>
 
-        <div className="space-y-2">
-          <label htmlFor="bathrooms" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-            Bathrooms
-          </label>
-          <select
-            id="bathrooms"
-            name="bathrooms"
-            value={filters.bathrooms}
-            onChange={handleFilterChange}
-            className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Any</option>
-            <option value="1">1+</option>
-            <option value="2">2+</option>
-            <option value="3">3+</option>
-            <option value="4">4+</option>
-          </select>
-        </div>
-      </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Bathrooms
+              </label>
+              <input
+                type="number"
+                min="0"
+                placeholder="Any"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={filters.bathrooms}
+                onChange={(e) => setFilters({ ...filters, bathrooms: e.target.value })}
+              />
+            </div>
+          </div>
+        )}
 
-      <div className="mt-6">
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           Search Properties
         </button>
-      </div>
-    </form>
+      </form>
+    </div>
+  );
+}
+
+export function PropertySearch() {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-8">Loading...</div>}>
+      <PropertySearchContent />
+    </Suspense>
   );
 } 

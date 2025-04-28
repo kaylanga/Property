@@ -1,17 +1,17 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PropertySearch } from '@/components/properties/PropertySearch';
 import { PropertyCard } from '@/components/properties/PropertyCard';
 import { Property } from '@/types/property';
 import { supabase } from '@/lib/supabase';
 
-export default function PropertiesPage() {
-  const searchParams = useSearchParams();
+function PropertiesContent() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     async function fetchProperties() {
@@ -55,8 +55,7 @@ export default function PropertiesPage() {
 
         setProperties(data as Property[]);
       } catch (err) {
-        console.error('Error fetching properties:', err);
-        setError('Failed to fetch properties. Please try again later.');
+        setError(err instanceof Error ? err.message : 'Failed to fetch properties');
       } finally {
         setLoading(false);
       }
@@ -65,34 +64,30 @@ export default function PropertiesPage() {
     fetchProperties();
   }, [searchParams]);
 
+  if (loading) {
+    return <div className="flex justify-center p-8">Loading properties...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500 p-8">{error}</div>;
+  }
+
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Find Your Perfect Property</h1>
-      
-      <PropertySearch className="mb-8" />
+    <div className="container mx-auto px-4 py-8">
+      <PropertySearch />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+        {properties.map((property) => (
+          <PropertyCard key={property.id} property={property} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-8" role="alert">
-          <p>{error}</p>
-        </div>
-      )}
-
-      {loading ? (
-        <div className="flex justify-center items-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      ) : properties.length === 0 ? (
-        <div className="text-center py-12">
-          <h3 className="text-xl font-semibold mb-2">No properties found</h3>
-          <p className="text-gray-600">Try adjusting your search filters</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {properties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
-      )}
-    </main>
+export default function PropertiesPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-8">Loading...</div>}>
+      <PropertiesContent />
+    </Suspense>
   );
 } 

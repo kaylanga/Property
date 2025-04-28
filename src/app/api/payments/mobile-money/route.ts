@@ -1,9 +1,20 @@
 import { NextResponse } from 'next/server';
 import { Currency } from '../../../../types/property';
 
+type MobileMoneyProvider = 'MTN Mobile Money' | 'M-Pesa' | 'Airtel Money' | 'Tigo Pesa';
+
+type ProviderConfig = {
+  apiEndpoint: string;
+  apiKey: string | undefined;
+};
+
+type MobileMoneyProviders = {
+  [K in MobileMoneyProvider]: ProviderConfig;
+};
+
 // This is a mock implementation. In a real application, you would integrate
 // with actual mobile money providers' APIs (MTN Mobile Money, M-Pesa, etc.)
-const mobileMoneyProviders = {
+const mobileMoneyProviders: MobileMoneyProviders = {
   'MTN Mobile Money': {
     apiEndpoint: 'https://api.mtn.com/collection/v1_0',
     apiKey: process.env.MTN_MOBILE_MONEY_API_KEY,
@@ -22,9 +33,16 @@ const mobileMoneyProviders = {
   },
 };
 
+type RequestData = {
+  amount: number;
+  currency: Currency;
+  phoneNumber: string;
+  provider: MobileMoneyProvider;
+};
+
 export async function POST(request: Request) {
   try {
-    const { amount, currency, phoneNumber, provider } = await request.json();
+    const { amount, currency, phoneNumber, provider } = (await request.json()) as RequestData;
 
     // Validate the request
     if (!amount || !currency || !phoneNumber || !provider) {

@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { FaGoogle, FaGithub, FaFacebook, FaTwitter, FaLinkedin, FaApple } from 'react-icons/fa';
 
-export default function SignInForm() {
+function SignInFormContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -53,17 +53,14 @@ export default function SignInForm() {
     setLoading(true);
 
     try {
-      // If 2FA is enabled and code is provided, verify it
-      if (showTwoFactor && twoFactorCode) {
-        const { data: verifyData, error: verifyError } = await supabase
-          .rpc('verify_two_factor_code', { 
-            challenge_id: twoFactorId, 
-            code: twoFactorCode 
-          });
+      if (showTwoFactor) {
+        // Verify 2FA code
+        const { error } = await supabase.rpc('verify_two_factor', {
+          challenge_id: twoFactorId,
+          code: twoFactorCode,
+        });
 
-        if (verifyError || !verifyData.valid) {
-          throw new Error('Invalid 2FA code');
-        }
+        if (error) throw error;
       }
 
       const { error } = await supabase.auth.signInWithPassword({
@@ -71,35 +68,12 @@ export default function SignInForm() {
         password,
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      // Log successful login
-      await supabase.from('security_audit_logs').insert({
-        event_type: 'LOGIN_SUCCESS',
-        details: { 
-          ip_address: await fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => data.ip),
-          user_agent: navigator.userAgent
-        }
-      });
-
-      const redirectTo = searchParams.get('redirectedFrom') || '/dashboard';
+      const redirectTo = searchParams.get('redirectTo') || '/dashboard';
       router.push(redirectTo);
-      toast.success('Successfully signed in!');
     } catch (error) {
-      // Log failed login attempt
-      await supabase.from('security_audit_logs').insert({
-        event_type: 'LOGIN_FAILURE',
-        details: { 
-          email,
-          error: error.message,
-          ip_address: await fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => data.ip),
-          user_agent: navigator.userAgent
-        }
-      });
-      
-      toast.error(error.message);
+      toast.error(error instanceof Error ? error.message : 'Failed to sign in');
     } finally {
       setLoading(false);
     }
@@ -120,8 +94,9 @@ export default function SignInForm() {
       });
 
       if (error) throw error;
-    } catch (error) {
-      toast.error(`Failed to sign in with ${provider}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      toast.error(`Failed to sign in with ${provider}: ${errorMessage}`);
     }
   };
 
@@ -134,7 +109,7 @@ export default function SignInForm() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
-            <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
               create a new account
             </Link>
           </p>
@@ -151,7 +126,7 @@ export default function SignInForm() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -167,61 +142,66 @@ export default function SignInForm() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            {showTwoFactor && (
-              <div>
-                <label htmlFor="two-factor-code" className="sr-only">
-                  Two-Factor Authentication Code
-                </label>
-                <input
-                  id="two-factor-code"
-                  name="two-factor-code"
-                  type="text"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Enter 2FA code"
-                  value={twoFactorCode}
-                  onChange={(e) => setTwoFactorCode(e.target.value)}
-                />
-              </div>
-            )}
-            {!showTwoFactor && (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                    Remember me
-                  </label>
-                </div>
+          </div>
 
-                <div className="text-sm">
-                  <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
-                    Forgot your password?
-                  </Link>
-                </div>
-              </div>
-            )}
+          {showTwoFactor && (
+            <div>
+              <label htmlFor="two-factor-code" className="sr-only">
+                Two-Factor Authentication Code
+              </label>
+              <input
+                id="two-factor-code"
+                name="two-factor-code"
+                type="text"
+                required
+                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Enter 2FA code"
+                value={twoFactorCode}
+                onChange={(e) => setTwoFactorCode(e.target.value)}
+              />
+            </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                Remember me
+              </label>
+            </div>
+
+            <div className="text-sm">
+              <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                Forgot your password?
+              </Link>
+            </div>
           </div>
 
           <div>
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? (
+                <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                </span>
+              ) : null}
+              Sign in
             </button>
           </div>
         </form>
@@ -242,46 +222,30 @@ export default function SignInForm() {
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
               <FaGoogle className="h-5 w-5 text-red-500" />
-              <span className="sr-only">Sign in with Google</span>
             </button>
             <button
               onClick={() => handleSocialLogin('github')}
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
               <FaGithub className="h-5 w-5 text-gray-900" />
-              <span className="sr-only">Sign in with GitHub</span>
             </button>
             <button
               onClick={() => handleSocialLogin('facebook')}
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
               <FaFacebook className="h-5 w-5 text-blue-600" />
-              <span className="sr-only">Sign in with Facebook</span>
-            </button>
-            <button
-              onClick={() => handleSocialLogin('twitter')}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <FaTwitter className="h-5 w-5 text-blue-400" />
-              <span className="sr-only">Sign in with Twitter</span>
-            </button>
-            <button
-              onClick={() => handleSocialLogin('linkedin')}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <FaLinkedin className="h-5 w-5 text-blue-700" />
-              <span className="sr-only">Sign in with LinkedIn</span>
-            </button>
-            <button
-              onClick={() => handleSocialLogin('apple')}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <FaApple className="h-5 w-5 text-gray-900" />
-              <span className="sr-only">Sign in with Apple</span>
             </button>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignInForm() {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-8">Loading...</div>}>
+      <SignInFormContent />
+    </Suspense>
   );
 } 
