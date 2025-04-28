@@ -157,4 +157,13 @@ export function getAPIErrorDetails(error: unknown): any {
     return error.details;
   }
   return undefined;
+}
+
+type VercelErrorCode = string;
+
+interface VercelError {
+  code: VercelErrorCode;
+  message: string;
+  details?: any;
+  statusCode?: number;
 } 

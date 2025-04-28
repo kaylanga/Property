@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import type { Property } from '../../types';
 
@@ -17,10 +17,13 @@ export function PropertyAssistant() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { data: properties } = useQuery('properties', async () => {
-    const { data, error } = await supabase.from('properties').select('*');
-    if (error) throw error;
-    return data as Property[];
+  const { data: properties } = useQuery({
+    queryKey: ['properties'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('properties').select('*');
+      if (error) throw error;
+      return data as Property[];
+    }
   });
 
   const scrollToBottom = () => {
@@ -46,7 +49,7 @@ export function PropertyAssistant() {
 
     // Simulate AI response
     setTimeout(() => {
-      const response = generateAIResponse(input, properties || []);
+      const response = generateAIResponse(input, properties as Property[] || []);
       const assistantMessage: Message = {
         role: 'assistant',
         content: response,

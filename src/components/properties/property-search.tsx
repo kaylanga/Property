@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import type { Property } from '../../types';
 
@@ -11,6 +11,8 @@ interface SearchFilters {
   propertyType?: string[];
   features?: string[];
   aiRecommendations?: boolean;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 export function PropertySearch() {
@@ -19,30 +21,29 @@ export function PropertySearch() {
   });
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: properties, isLoading } = useQuery(
-    ['properties', filters],
-    async () => {
+  const { data: properties } = useQuery({
+    queryKey: ['properties', filters],
+    queryFn: async () => {
       let query = supabase.from('properties').select('*');
-      
+
+      if (filters.minPrice) {
+        query = query.gte('price', filters.minPrice);
+      }
+      if (filters.maxPrice) {
+        query = query.lte('price', filters.maxPrice);
+      }
+      if (filters.propertyType) {
+        query = query.eq('type', filters.propertyType);
+      }
       if (filters.location) {
-        query = query.ilike('location->city', `%${filters.location}%`);
-      }
-      
-      if (filters.priceRange) {
-        query = query
-          .gte('price', filters.priceRange[0])
-          .lte('price', filters.priceRange[1]);
-      }
-      
-      if (filters.propertyType?.length) {
-        query = query.in('type', filters.propertyType);
+        query = query.ilike('location', `%${filters.location}%`);
       }
 
       const { data, error } = await query;
       if (error) throw error;
       return data as Property[];
     }
-  );
+  });
 
   const [aiRecommendations, setAiRecommendations] = useState<Property[]>([]);
 
@@ -50,7 +51,7 @@ export function PropertySearch() {
     if (filters.aiRecommendations && properties) {
       // Simulate AI recommendations based on user preferences and property features
       const recommendedProperties = properties
-        .sort((a, b) => {
+        .sort((a: Property, b: Property) => {
           // Simple scoring system based on property features
           const scoreA = calculatePropertyScore(a);
           const scoreB = calculatePropertyScore(b);
@@ -141,9 +142,7 @@ export function PropertySearch() {
 
       {/* Results */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isLoading ? (
-          <div>Loading...</div>
-        ) : (
+        {properties ? (
           <>
             {filters.aiRecommendations && aiRecommendations.length > 0 && (
               <div className="col-span-full">
@@ -159,12 +158,14 @@ export function PropertySearch() {
             <div className="col-span-full">
               <h3 className="text-xl font-semibold mb-4">All Properties</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {properties?.map((property) => (
+                {properties.map((property: Property) => (
                   <PropertyCard key={property.id} property={property} />
                 ))}
               </div>
             </div>
           </>
+        ) : (
+          <div>Loading...</div>
         )}
       </div>
     </div>

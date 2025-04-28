@@ -1,6 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { handleVercelError, VercelErrorCode, isVercelError } from './lib/vercel-error-handler'
+import { handleVercelError, type VercelError, isVercelError } from './lib/vercel-error-handler'
 import { handleAPIError, APIError } from './lib/api-error-handler'
 
 // Maximum request size (10MB)
@@ -16,7 +16,11 @@ export async function middleware(request: NextRequest) {
   try {
     // Check URL length
     if (request.url.length > MAX_URL_LENGTH) {
-      return handleVercelError(VercelErrorCode.URL_TOO_LONG)
+      return handleVercelError({
+        code: 'URL_TOO_LONG',
+        message: 'URL length exceeds maximum allowed length',
+        statusCode: 414
+      })
     }
 
     // Check request headers size
@@ -25,20 +29,32 @@ export async function middleware(request: NextRequest) {
       0
     )
     if (headersSize > MAX_HEADER_SIZE) {
-      return handleVercelError(VercelErrorCode.REQUEST_HEADER_TOO_LARGE)
+      return handleVercelError({
+        code: 'REQUEST_HEADER_TOO_LARGE',
+        message: 'Request header size exceeds maximum allowed size',
+        statusCode: 431
+      })
     }
 
     // Check request method
     const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
     if (!allowedMethods.includes(request.method)) {
-      return handleVercelError(VercelErrorCode.INVALID_REQUEST_METHOD)
+      return handleVercelError({
+        code: 'INVALID_REQUEST_METHOD',
+        message: 'Invalid request method',
+        statusCode: 405
+      })
     }
 
     // Check request body size for POST, PUT, PATCH requests
     if (['POST', 'PUT', 'PATCH'].includes(request.method)) {
       const contentLength = request.headers.get('content-length')
       if (contentLength && parseInt(contentLength) > MAX_REQUEST_SIZE) {
-        return handleVercelError(VercelErrorCode.FUNCTION_PAYLOAD_TOO_LARGE)
+        return handleVercelError({
+          code: 'FUNCTION_PAYLOAD_TOO_LARGE',
+          message: 'Request payload too large',
+          statusCode: 413
+        })
       }
     }
 
@@ -127,7 +143,12 @@ export async function middleware(request: NextRequest) {
     console.error('Middleware error:', error)
     
     if (isVercelError(error)) {
-      return handleVercelError(error)
+      return handleVercelError({
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        statusCode: error.statusCode
+      })
     }
     
     const apiError = handleAPIError(error)
