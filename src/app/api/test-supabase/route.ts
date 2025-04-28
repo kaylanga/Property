@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { testSupabaseConnection } from '@/lib/supabase-test';
+import { handleAPIError, APIError } from '@/lib/api-error-handler';
+import { handleVercelError, isVercelError } from '@/lib/vercel-error-handler';
 
 export async function GET() {
   try {
@@ -18,10 +20,16 @@ export async function GET() {
       }, { status: 500 });
     }
   } catch (error) {
-    console.error('Error testing Supabase connection:', error);
-    return NextResponse.json({ 
-      status: 'error', 
-      message: 'An error occurred while testing Supabase connection' 
-    }, { status: 500 });
+    console.error('Supabase test error:', error);
+    
+    if (isVercelError(error)) {
+      return handleVercelError(error);
+    }
+    
+    const apiError = handleAPIError(error);
+    return NextResponse.json(
+      { error: apiError.message, code: apiError.code, details: apiError.details },
+      { status: apiError.statusCode }
+    );
   }
 } 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Currency } from '../../../../types/property';
-import { handleApiError } from '@/lib/api-error-handler';
-import { validateRequest } from '@/lib/request-validation';
+import { handleAPIError, APIError, ValidationError } from '@/lib/api-error-handler';
+import { handleVercelError, isVercelError } from '@/lib/vercel-error-handler';
 import { NextRequest } from 'next/server';
 
 type MobileMoneyProvider = 'MTN Mobile Money' | 'M-Pesa' | 'Airtel Money' | 'Tigo Pesa';
@@ -44,14 +44,14 @@ type RequestData = {
 };
 
 export async function POST(request: NextRequest) {
-  // Validate the request
-  const validationError = validateRequest(request);
-  if (validationError) {
-    return validationError;
-  }
-
   try {
-    const { amount, currency, phoneNumber, provider } = (await request.json()) as RequestData;
+    const body = await request.json();
+    
+    if (!body.amount || !body.phoneNumber || !body.provider) {
+      throw new ValidationError('Amount, phone number, and provider are required');
+    }
+
+    const { amount, currency, phoneNumber, provider } = body as RequestData;
 
     // Validate the request
     if (!amount || !currency || !phoneNumber || !provider) {
@@ -85,6 +85,16 @@ export async function POST(request: NextRequest) {
       message: 'Payment initiated successfully',
     });
   } catch (error) {
-    return handleApiError(error, 'Mobile Money Payment');
+    console.error('Mobile money payment error:', error);
+    
+    if (isVercelError(error)) {
+      return handleVercelError(error);
+    }
+    
+    const apiError = handleAPIError(error);
+    return NextResponse.json(
+      { error: apiError.message, code: apiError.code, details: apiError.details },
+      { status: apiError.statusCode }
+    );
   }
 } 

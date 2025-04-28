@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { handleAPIError, APIError, ValidationError } from '@/lib/api-error-handler';
+import { handleVercelError, isVercelError } from '@/lib/vercel-error-handler';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
@@ -7,7 +9,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: Request) {
   try {
-    const { paymentIntent, paymentIntentClientSecret } = await request.json();
+    const body = await request.json();
+    
+    if (!body.paymentIntentId) {
+      throw new ValidationError('Payment intent ID is required');
+    }
+
+    const { paymentIntent, paymentIntentClientSecret } = body;
 
     // Retrieve the payment intent
     const intent = await stripe.paymentIntents.retrieve(paymentIntent);
@@ -31,9 +39,15 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     console.error('Payment verification error:', error);
+    
+    if (isVercelError(error)) {
+      return handleVercelError(error);
+    }
+    
+    const apiError = handleAPIError(error);
     return NextResponse.json(
-      { error: 'Payment verification failed' },
-      { status: 500 }
+      { error: apiError.message, code: apiError.code, details: apiError.details },
+      { status: apiError.statusCode }
     );
   }
 } 

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { Currency } from '../../../../types/property';
-import { handleApiError } from '@/lib/api-error-handler';
+import { handleAPIError, APIError, ValidationError } from '@/lib/api-error-handler';
+import { handleVercelError, isVercelError } from '@/lib/vercel-error-handler';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
@@ -9,7 +10,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: Request) {
   try {
-    const { paymentMethodId, amount, currency } = await request.json();
+    const body = await request.json();
+    
+    if (!body.amount || !body.currency) {
+      throw new ValidationError('Amount and currency are required');
+    }
+
+    const { paymentMethodId, amount, currency } = body;
 
     // Create a payment intent
     const paymentIntent = await stripe.paymentIntents.create({
@@ -22,6 +29,16 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    return handleApiError(error, 'Payment Processing');
+    console.error('Payment processing error:', error);
+    
+    if (isVercelError(error)) {
+      return handleVercelError(error);
+    }
+    
+    const apiError = handleAPIError(error);
+    return NextResponse.json(
+      { error: apiError.message, code: apiError.code, details: apiError.details },
+      { status: apiError.statusCode }
+    );
   }
 } 
