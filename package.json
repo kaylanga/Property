@@ -3,11 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+"dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
-  },
+    "lint": "next lint",
+    "deploy:staging": "vercel",
+    "deploy:production": "vercel --prod",
+    "analyze": "ANALYZE=true next build",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  }
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@stripe/react-stripe-js": "^2.4.0",
@@ -15,7 +20,7 @@
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.39.0",
     "@tanstack/react-query": "^5.74.7",
-    "next": "14.0.4",
+    "next": "^14.0.4",
     "next-themes": "^0.4.6",
     "react": "^18",
     "react-dom": "^18",
