@@ -111,6 +111,23 @@ export interface PropertyFeatures {
   hasOtherOil?: boolean;
   hasOtherGas?: boolean;
   hasOther?: boolean;
+  // Additional sustainability features
+  energyEfficiencyRating?: string;
+  waterEfficiencyRating?: string;
+  carbonFootprint?: number;
+  greenBuildingCertification?: string;
+  sustainabilityFeatures?: string[];
+  // Additional accessibility features
+  isWheelchairAccessible?: boolean;
+  hasElevatorAccess?: boolean;
+  hasRamps?: boolean;
+  hasWideHallways?: boolean;
+  hasAdaptedBathroom?: boolean;
+  hasLoweredCounters?: boolean;
+  hasGrabBars?: boolean;
+  hasVisualAids?: boolean;
+  hasAudioAids?: boolean;
+  hasEmergencySystem?: boolean;
 }
 
 /**

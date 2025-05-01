@@ -32,7 +32,7 @@ A modern real estate platform focused on the East African market, particularly U
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/property-africa.git
+   git clone https://github.com/kaylanga/property-africa.git
    cd property-africa
    ```
 
@@ -68,41 +68,15 @@ A modern real estate platform focused on the East African market, particularly U
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-## Database Migrations
-Explanation of changes:
-1. README.md changes:
-- Removed duplicate migration statements
-- Fixed SQL syntax for virtual_tour column addition
-- Organized migrations in a clearer format
-- Added proper SQL comment for the virtual_tour column
-2. property.ts changes:
-- Updated virtualTour interface to match database schema
-- Added proper type definitions for tour types
-- Made the field optional with '?'
-- Added metadata field for additional tour information
-These changes should resolve the issues with:
-- Database migrations consistency
-- Virtual tour field definition
-- SQL syntax errors
-- Type safety for the virtual tour feature
-Make sure to:
-1. Run the migrations in the correct order
-2. Update any existing code that uses the virtualTour field to match the new interface
-3. Test the virtual tour functionality after applying these changes
-Let me know if you need any clarification or have questions about implementing these changes.
-1. README.md changes:
-- Removed duplicate migration statements
-- Fixed SQL syntax for virtual_tour column addition
-- Organized migrations in a clearer format
-- Added proper SQL comment for the virtual_tour column
-2. property.ts changes:
-- Updated virtualTour interface to match database schema
-- Added proper type definitions for tour types
-- Made the field optional with '?'
-- Added metadata field for additional tour information
-These changes should resolve the issues with:
-- Database migrations consistency
-- Virtual tour field definition
+## Database Schema
+### Properties Table
+- Added virtual_tour column (JSONB)
+- Added proper indexing for virtual tour queries
+### Property Alerts Table
+- Created new table for user property alerts
+- Added indexes for performance optimization
+- Implemented RLS policies for security
+## Development Setup
 - SQL syntax errors
 - Type safety for the virtual tour feature
 Make sure to:

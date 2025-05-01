@@ -3,41 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-"dev": "next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "deploy:staging": "vercel",
-    "deploy:production": "vercel --prod",
-    "analyze": "ANALYZE=true next build",
-    "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "lint": "next lint"
 },
   "dependencies": {
-    "@heroicons/react": "^2.2.0",
-    "@stripe/react-stripe-js": "^2.4.0",
-    "@stripe/stripe-js": "^2.2.0",
     "@supabase/auth-helpers-nextjs": "^0.8.7",
     "@supabase/ssr": "^0.0.10",
     "@supabase/supabase-js": "^2.39.0",
-    "@tanstack/react-query": "^5.74.7",
+    "@tanstack/react-query": "^5.0.0",
     "next": "^14.0.4",
-    "next-themes": "^0.4.6",
     "react": "^18",
-    "react-dom": "^18",
-    "react-hot-toast": "^2.5.2",
-    "react-query": "^3.39.3",
-    "stripe": "^14.8.0"
-},
-  "devDependencies": {
-    "@types/node": "^20.17.32",
-    "@types/react": "^18.3.20",
-    "@types/react-dom": "^18.3.6",
-    "autoprefixer": "^10.0.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.0.4",
-    "postcss": "^8",
-    "tailwindcss": "^3.3.0",
-    "typescript": "^5"
-  }
-}
+    "react-dom": "

@@ -22,7 +22,9 @@
       "outFiles": [
         "${workspaceFolder}/.next/**/*.js"
       ],
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true
     }
   ]
+}
 }
