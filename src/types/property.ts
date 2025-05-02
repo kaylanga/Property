@@ -1,29 +1,15 @@
-/**
- * Property Types
- * 
- * This module defines the types and interfaces related to properties in the system.
- * It includes the main Property interface and related types for property features,
- * locations, and other property-specific data.
- */
-
-/**
- * Currency enum for supported currencies in the system
- */
-enum Currency {
-  UGX = 'UGX', // Ugandan Shilling
-  USD = 'USD', // US Dollar
-  KES = 'KES', // Kenyan Shilling
-  TZS = 'TZS', // Tanzanian Shilling
-  RWF = 'RWF'  // Rwandan Franc
+export enum PropertyType {
+  APARTMENT = 'apartment',
+  HOUSE = 'house',
+  CONDO = 'condo',
+  LAND = 'land',
+  COMMERCIAL = 'commercial',
+  UNFINISHED = 'unfinished'
 }
-
-/**
- * Property status enum
- */
 export enum PropertyStatus {
-  AVAILABLE = 'available',
+  FOR_SALE = 'for-sale',
+  FOR_RENT = 'for-rent',
   SOLD = 'sold',
-  RENTED = 'rented',
   PENDING = 'pending',
   OFF_MARKET = 'off_market'
 }
@@ -190,9 +176,20 @@ virtualTour?: {
   metadata?: Record<string, any>;
 };
 
- * A component that allows users to create and manage property alerts based on specific criteria.
-env
-ENDPOINTS_ENCRYPTION_KEY=your-32-byte-secret-key
+  floorPlans?: {
+    url: string;
+    caption?: string;
+    level?: number;
+  }[];
+  documents?: {
+    url: string;
+    name: string;
+    type: string;
+    size: number;
+  }[];
+}
+// Removed undefined 'env' reference
+// ENDPOINTS_ENCRYPTION_KEY=your-32-byte-secret-key
 const encryptedData = {
   iv: "your-iv-hex-string",
   content: "your-encrypted-content-hex-string"
@@ -215,36 +212,8 @@ interface EncryptedData {
  * @param secretKey - The secret key used for decryption (must be 32 bytes for AES-256)
  * @returns The decrypted data as a string
  */
-export function decryptAES(encryptedData: EncryptedData, secretKey: string): string {
-  try {
-    // Ensure the key is exactly 32 bytes (256 bits) for AES-256
-    const key = Buffer.from(secretKey.padEnd(32, '0').slice(0, 32));
-    
-    // Convert IV from hex string to Buffer
-    const iv = Buffer.from(encryptedData.iv, 'hex');
-    
-    // Create decipher
-    const decipher = createDecipheriv('aes-256-cbc', key, iv);
-    
-    // Decrypt the content
-    let decrypted = decipher.update(encryptedData.content, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    
-    return decrypted;
-  } catch (error) {
-    console.error('Decryption error:', error);
-    throw new Error('Failed to decrypt endpoints data');
-  }
-}
-/**
- * Generates a random encryption key of specified length
- * 
- * @param length - The length of the key in bytes
- * @returns The generated key as a hex string
- */
-export function generateKey(length: number = 32): string {
-  return randomBytes(length).toString('hex');
-}
+// Removed duplicate implementation of decryptAES to resolve redeclaration error.
+// Removed duplicate implementation of generateKey to resolve redeclaration error.
 interface EncryptedData {
   iv: string;
   content: string;
@@ -278,6 +247,13 @@ export function decryptAES(encryptedData: EncryptedData, secretKey: string): str
   }
 }
 /**
+import { randomBytes } from 'crypto';
+
+import { randomBytes } from 'crypto';
+
+import { randomBytes } from 'crypto';
+
+/**
  * Generates a random encryption key of specified length
  * 
  * @param length - The length of the key in bytes
@@ -286,9 +262,10 @@ export function decryptAES(encryptedData: EncryptedData, secretKey: string): str
 export function generateKey(length: number = 32): string {
   return randomBytes(length).toString('hex');
 }
- * - Location preferences
- * - Property types
- * - Price ranges
+// - Location preferences
+// - Property types
+// - Price ranges
+ */
  * - Specific features
  * 
  * Features:

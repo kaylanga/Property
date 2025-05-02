@@ -13,8 +13,6 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "allowJs": true,
-    "types": ["@supabase/supabase-js"],
     "plugins": [
       {
         "name": "next"
@@ -23,7 +21,6 @@
     "paths": {
       "@/*": ["./src/*"]
     }
-  }
   },
   "include": [
     "next-env.d.ts",
@@ -32,5 +29,4 @@
     "**/*.tsx"
   ],
   "exclude": ["node_modules"]
-}
 }

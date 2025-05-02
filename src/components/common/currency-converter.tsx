@@ -40,10 +40,10 @@ interface CurrencyConverterProps {
  */
 const exchangeRates: Record<Currency, number> = {
   [Currency.UGX]: 1,
-  [Currency.USD]: 0.00027,
-  [Currency.KES]: 0.041,
-  [Currency.TZS]: 0.63,
-  [Currency.RWF]: 0.32,
+  [Currency.KES]: 0.041,  // 1 UGX = 0.041 KES
+  [Currency.TZS]: 0.63,   // 1 UGX = 0.63 TZS
+  [Currency.RWF]: 0.32,   // 1 UGX = 0.32 RWF
+  [Currency.USD]: 0.00027 // 1 UGX = 0.00027 USD
 };
 
 /**

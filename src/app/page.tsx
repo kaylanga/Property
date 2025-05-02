@@ -1,29 +1,26 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { PropertySearch } from '../components/properties/property-search';
 import { AuthPopup } from '../components/auth/auth-popup';
 import { supabase } from '../lib/supabase';
-
 export default function Home() {
-  const [showAuthPopup, setShowAuthPopup] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-      
-      // Show auth popup for non-authenticated users
-      if (!session) {
-        setShowAuthPopup(true);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  return (
+    const [showAuthPopup, setShowAuthPopup] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    useEffect(() => {
+      const checkAuth = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        setIsAuthenticated(!!session);
+        
+        // Show auth popup for non-authenticated users
+        if (!session) {
+          setShowAuthPopup(true);
+        }
+      };
+  
+      checkAuth();
+    }, []);
+  
+    return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
       <div className="bg-blue-600 text-white py-20">
@@ -52,6 +49,8 @@ export default function Home() {
       {showAuthPopup && (
         <AuthPopup onClose={() => setShowAuthPopup(false)} />
       )}
-    </div>
+    );
+  };
+  
+  export default Page;
   );
-} 

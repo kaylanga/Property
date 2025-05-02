@@ -7,23 +7,33 @@ const mobileMoneyProviders = {
   'MTN Mobile Money': {
     apiEndpoint: 'https://api.mtn.com/collection/v1_0',
     apiKey: process.env.MTN_MOBILE_MONEY_API_KEY,
+    countries: ['UG', 'RW'],
+    currencies: ['UGX', 'RWF']
   },
   'M-Pesa': {
     apiEndpoint: 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest',
     apiKey: process.env.MPESA_API_KEY,
+    countries: ['KE', 'TZ'],
+    currencies: ['KES', 'TZS']
   },
   'Airtel Money': {
     apiEndpoint: 'https://api.airtel.com/money/v1',
     apiKey: process.env.AIRTEL_MONEY_API_KEY,
+    countries: ['UG', 'KE', 'TZ', 'RW'],
+    currencies: ['UGX', 'KES', 'TZS', 'RWF']
   },
   'Tigo Pesa': {
     apiEndpoint: 'https://api.tigo.com/v1',
     apiKey: process.env.TIGO_PESA_API_KEY,
-  },
+    countries: ['TZ'],
+    currencies: ['TZS']
+  }
 };
-
-export async function POST(request: Request) {
-  try {
+    apiKey: process.env.TIGO_PESA_API_KEY,
+    countries: ['TZ'],
+    currencies: ['TZS']
+  }
+};
     const { amount, currency, phoneNumber, provider } = await request.json();
 
     // Validate the request

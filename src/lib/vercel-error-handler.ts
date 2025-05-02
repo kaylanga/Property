@@ -38,14 +38,14 @@ export interface VercelError {
  * This mapping ensures consistent error responses across the application
  */
 const errorStatusCodes: Record<string, number> = {
-  // ... (keep existing errorStatusCodes object contents)
-};
-
-/**
- * Error messages mapping for Vercel error codes
- */
-const errorMessages: Record<string, string> = {
-  // ... (keep existing errorMessages object contents)
+  FUNCTION_INVOCATION_FAILED: 500,
+  FUNCTION_INVOCATION_TIMEOUT: 504,
+  FUNCTION_PAYLOAD_TOO_LARGE: 413,
+  DATABASE_CONNECTION_ERROR: 503,
+  AUTHENTICATION_ERROR: 401,
+  AUTHORIZATION_ERROR: 403,
+  VALIDATION_ERROR: 400,
+  NOT_FOUND_ERROR: 404
 };
 
 function getErrorMessage(code: string): string {

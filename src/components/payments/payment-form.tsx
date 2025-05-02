@@ -3,43 +3,39 @@
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
-  Elements,
-  CardElement,
-  useStripe,
-  useElements,
-} from '@stripe/react-stripe-js';
-import { Currency } from '../../types/property';
-
-// Initialize Stripe
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-
-interface PaymentFormProps {
-  amount: number;
-  currency: Currency;
-  onSuccess: () => void;
-  onError: (error: string) => void;
+interface MobileMoneyProvider {
+  apiEndpoint: string;
+  apiKey: string | undefined;
+  countries: string[];
+  currencies: string[];
 }
-
-type PaymentMethod = 'card' | 'mobile_money';
-
-const mobileMoneyProviders = {
-  UGX: ['MTN Mobile Money', 'Airtel Money'],
-  KES: ['M-Pesa', 'Airtel Money'],
-  TZS: ['M-Pesa', 'Tigo Pesa'],
-  RWF: ['Mobile Money', 'Airtel Money'],
+const mobileMoneyProviders: Record<string, MobileMoneyProvider> = {
+  'MTN Mobile Money': {
+    apiEndpoint: 'https://api.mtn.com/collection/v1_0',
+    apiKey: process.env.MTN_MOBILE_MONEY_API_KEY,
+    countries: ['UG', 'RW'],
+    currencies: ['UGX', 'RWF']
+  },
+  'M-Pesa': {
+    apiEndpoint: 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest',
+    apiKey: process.env.MPESA_API_KEY,
+    countries: ['KE', 'TZ'],
+    currencies: ['KES', 'TZS']
+  },
+  'Airtel Money': {
+    apiEndpoint: 'https://api.airtel.com/money/v1',
+    apiKey: process.env.AIRTEL_MONEY_API_KEY,
+    countries: ['UG', 'KE', 'TZ', 'RW'],
+    currencies: ['UGX', 'KES', 'TZS', 'RWF']
+  },
+  'Tigo Pesa': {
+    apiEndpoint: 'https://api.tigo.com/v1',
+    apiKey: process.env.TIGO_PESA_API_KEY,
+    countries: ['TZ'],
+    currencies: ['TZS']
+  }
 };
-
-function PaymentFormContent({
-  amount,
-  currency,
-  onSuccess,
-  onError,
-}: PaymentFormProps) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
-  const [loading, setLoading] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
+type PaymentMethod = 'card' | 'mobile_money';
 
   const handleCardPayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,17 +44,14 @@ function PaymentFormContent({
       return;
     }
     setLoading(true);
-
     try {
       const { error, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
         card: elements.getElement(CardElement)!,
       });
-
       if (error) {
         throw error;
       }
-
       // Send payment method ID to your server
       const response = await fetch('/api/payments/process', {
         method: 'POST',
@@ -71,13 +64,10 @@ function PaymentFormContent({
           currency,
         }),
       });
-
       const result = await response.json();
-
       if (result.error) {
         throw new Error(result.error);
       }
-
       onSuccess();
     } catch (err) {
       onError(err instanceof Error ? err.message : 'Payment failed');

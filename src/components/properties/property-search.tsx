@@ -52,14 +52,19 @@ interface SearchFilters {
  */
 export function PropertySearch() {
   const [filters, setFilters] = useState<SearchFilters>({
+    location: '',
+    priceRange: [0, 1000000],
+    propertyType: [],
+    features: [],
     aiRecommendations: true,
+    bedrooms: 0,
+    bathrooms: 0,
+    minArea: 0,
+    maxArea: 0,
+    amenities: [],
+    sortBy: 'price',
+    sortOrder: 'asc'
   });
-  const [searchQuery, setSearchQuery] = useState('');
-
-  /**
-   * Fetch properties from Supabase based on current filters
-   * Uses React Query for caching and automatic updates
-   */
   const { data: properties, isLoading } = useQuery(
     ['properties', filters],
     async () => {
@@ -68,45 +73,37 @@ export function PropertySearch() {
       if (filters.location) {
         query = query.ilike('location->city', `%${filters.location}%`);
       }
-      
       if (filters.priceRange) {
         query = query
-          .gte('price', filters.priceRange[0])
-          .lte('price', filters.priceRange[1]);
+          .gte('pricing->listPrice', filters.priceRange[0])
+          .lte('pricing->listPrice', filters.priceRange[1]);
       }
       
       if (filters.propertyType?.length) {
         query = query.in('type', filters.propertyType);
       }
-
+      if (filters.bedrooms > 0) {
+        query = query.gte('features->bedrooms', filters.bedrooms);
+      }
+      if (filters.bathrooms > 0) {
+        query = query.gte('features->bathrooms', filters.bathrooms);
+      }
+      if (filters.minArea > 0) {
+        query = query.gte('features->totalArea', filters.minArea);
+      }
+      if (filters.maxArea > 0) {
+        query = query.lte('features->totalArea', filters.maxArea);
+      }
+      if (filters.amenities?.length) {
+        query = query.contains('features->amenities', filters.amenities);
+      }
+      // Add sorting
+      query = query.order(filters.sortBy, { ascending: filters.sortOrder === 'asc' });
       const { data, error } = await query;
       if (error) throw error;
       return data as Property[];
     }
   );
-
-  const [aiRecommendations, setAiRecommendations] = useState<Property[]>([]);
-
-  /**
-   * Update AI recommendations when filters or properties change
-   * Implements a simple scoring system based on property features
-   */
-  useEffect(() => {
-    if (filters.aiRecommendations && properties) {
-      const recommendedProperties = properties
-        .sort((a, b) => {
-          const scoreA = calculatePropertyScore(a);
-          const scoreB = calculatePropertyScore(b);
-          return scoreB - scoreA;
-        })
-        .slice(0, 5);
-      
-      setAiRecommendations(recommendedProperties);
-    }
-  }, [filters.aiRecommendations, properties]);
-
-  /**
-   * Calculate a score for a property based on its features
    * Used to rank properties for AI recommendations
    * 
    * @param {Property} property - The property to score
