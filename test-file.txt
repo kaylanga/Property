@@ -1,0 +1,113 @@
+import { NextResponse } from 'next/server';
+import { middleware } from './middleware';
+import { createMocks } from 'node-mocks-http';
+import { RateLimitError } from './lib/api-error-handler';
+describe('Middleware Tests', () => {
+  // Rate Limiting Tests
+  describe('Rate Limiting', () => {
+    beforeEach(() => {
+      // Clear rate limit store before each test
+      (global as any).rateLimitStore = new Map();
+    });
+    it('should allow requests within rate limit', async () => {
+      const { req } = createMocks({
+        method: 'GET',
+        url: '/api/test',
+      });
+      
+      // Make multiple requests within limit
+      for (let i = 0; i < 99; i++) {
+        const response = await middleware(req);
+        expect(response.status).not.toBe(429);
+      }
+    });
+    it('should block requests exceeding rate limit', async () => {
+      const { req } = createMocks({
+        method: 'GET',
+        url: '/api/test',
+      });
+      
+      // Exceed rate limit
+      for (let i = 0; i < 101; i++) {
+        await middleware(req);
+      }
+      
+      const response = await middleware(req);
+      expect(response.status).toBe(429);
+    });
+  });
+  // Session Handling Tests
+  describe('Session Handling', () => {
+    it('should handle session timeout gracefully', async () => {
+      const { req } = createMocks({
+        method: 'GET',
+        url: '/dashboard',
+      });
+      // Mock slow session response
+      jest.useFakeTimers();
+      setTimeout(() => {}, 6000);
+      
+      const response = await middleware(req);
+      expect(response.status).toBe(500);
+      jest.useRealTimers();
+    });
+    it('should redirect unauthenticated users from protected routes', async () => {
+      const { req } = createMocks({
+        method: 'GET',
+        url: '/dashboard',
+      });
+      
+      const response = await middleware(req);
+      expect(response.status).toBe(302);
+      expect(response.headers.get('Location')).toContain('/login');
+    });
+  });
+  // Security Headers Tests
+  describe('Security Headers', () => {
+    it('should set all required security headers', async () => {
+      const { req } = createMocks({
+        method: 'GET',
+        url: '/api/test',
+      });
+      
+      const response = await middleware(req);
+      
+      expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff');
+      expect(response.headers.get('X-Frame-Options')).toBe('DENY');
+      expect(response.headers.get('X-XSS-Protection')).toBe('1; mode=block');
+      expect(response.headers.get('Referrer-Policy')).toBe('strict-origin-when-cross-origin');
+      expect(response.headers.get('Strict-Transport-Security')).toBe('max-age=31536000; includeSubDomains');
+    });
+  });
+  // Error Handling Tests
+  describe('Error Handling', () => {
+    it('should handle rate limit errors correctly', async () => {
+      const { req } = createMocks({
+        method: 'GET',
+        url: '/api/test',
+      });
+      
+      // Force a rate limit error
+      jest.spyOn(global, 'Map').mockImplementation(() => {
+        throw new RateLimitError('Too many requests');
+      });
+      
+      const response = await middleware(req);
+      expect(response.status).toBe(429);
+    });
+    it('should handle general errors gracefully', async () => {
+      const { req } = createMocks({
+        method: 'GET',
+        url: '/api/test',
+      });
+      
+      // Force a general error
+      jest.spyOn(global, 'Map').mockImplementation(() => {
+        throw new Error('Unknown error');
+      });
+      
+      const response = await middleware(req);
+      expect(response.status).toBe(500);
+    });
+  });
+});
