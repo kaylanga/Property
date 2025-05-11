@@ -1,0 +1,2 @@
+This directory will contain property images once they are uploaded.
+For development, we're using URLs from unsplash.com and other online sources.
