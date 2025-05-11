@@ -1,6 +1,6 @@
 /**
  * Property Assistant Component
- * 
+ *
  * An AI-powered chat interface that helps users with property-related queries.
  * Features:
  * - Real-time chat interface
@@ -8,23 +8,23 @@
  * - Price information
  * - Location details
  * - Feature descriptions
- * 
+ *
  * The assistant can:
  * - Answer general property questions
  * - Provide price averages
  * - List available locations
  * - Describe property features
  * - Recommend properties based on user input
- * 
+ *
  * @module property-assistant
  */
 
-'use client';
+"use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useQuery } from 'react-query';
-import { supabase } from '../../lib/supabase';
-import { Property as PropertyType } from '../../types/property';
+import React, { useState, useRef, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "../../lib/supabase";
+import { Property as PropertyType } from "../../types/property";
 
 /**
  * Message interface for chat messages
@@ -34,7 +34,7 @@ import { Property as PropertyType } from '../../types/property';
  * @property {Date} timestamp - When the message was sent
  */
 interface Message {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: Date;
 }
@@ -47,22 +47,22 @@ interface PropertyLocation {
 
 /**
  * PropertyAssistant Component
- * 
+ *
  * A chat interface that provides AI-powered assistance for property-related queries.
  * Integrates with Supabase for property data and implements a simple AI response system.
- * 
+ *
  * Features:
  * - Real-time chat with typing indicators
  * - Automatic scrolling to latest messages
  * - Property data integration
  * - Contextual responses
  * - Dark mode support
- * 
+ *
  * @returns {JSX.Element} The property assistant chat interface
  */
 export function PropertyAssistant() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -70,8 +70,8 @@ export function PropertyAssistant() {
    * Fetch properties from Supabase
    * Uses React Query for caching and automatic updates
    */
-  const { data: properties } = useQuery('properties', async () => {
-    const { data, error } = await supabase.from('properties').select('*');
+  const { data: properties } = useQuery("properties", async () => {
+    const { data, error } = await supabase.from("properties").select("*");
     if (error) throw error;
     return data as PropertyType[];
   });
@@ -80,7 +80,7 @@ export function PropertyAssistant() {
    * Scroll chat window to the latest message
    */
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -95,20 +95,20 @@ export function PropertyAssistant() {
     if (!input.trim()) return;
 
     const userMessage: Message = {
-      role: 'user',
+      role: "user",
       content: input,
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInput('');
+    setInput("");
     setIsTyping(true);
 
     // Simulate AI response
     setTimeout(() => {
       const response = generateAIResponse(input, properties || []);
       const assistantMessage: Message = {
-        role: 'assistant',
+        role: "assistant",
         content: response,
         timestamp: new Date(),
       };
@@ -119,36 +119,44 @@ export function PropertyAssistant() {
 
   /**
    * Generate AI response based on user input and available properties
-   * 
+   *
    * @param {string} userInput - The user's message
    * @param {Property[]} properties - Available properties
    * @returns {string} The AI's response
    */
-  const generateAIResponse = (userInput: string, properties: PropertyType[]): string => {
+  const generateAIResponse = (
+    userInput: string,
+    properties: PropertyType[],
+  ): string => {
     const input = userInput.toLowerCase();
 
     // Basic response patterns
-    if (input.includes('hello') || input.includes('hi')) {
-      return 'Hello! I can help you find properties and answer questions about real estate. What would you like to know?';
+    if (input.includes("hello") || input.includes("hi")) {
+      return "Hello! I can help you find properties and answer questions about real estate. What would you like to know?";
     }
 
-    if (input.includes('price') || input.includes('cost')) {
-      const avgPrice = properties.reduce((sum, p) => sum + p.pricing.listPrice, 0) / properties.length;
+    if (input.includes("price") || input.includes("cost")) {
+      const avgPrice =
+        properties.reduce((sum, p) => sum + p.pricing.listPrice, 0) /
+        properties.length;
       return `The average property price is $${avgPrice.toLocaleString()}. Would you like to see properties within a specific price range?`;
     }
 
-    if (input.includes('location') || input.includes('where')) {
-      const uniqueLocations = Array.from(new Set(properties.map(p => p.location.city)));
-      return `We have properties in ${uniqueLocations.join(', ')}. Which location interests you?`;
+    if (input.includes("location") || input.includes("where")) {
+      const uniqueLocations = Array.from(
+        new Set(properties.map((p) => p.location.city)),
+      );
+      return `We have properties in ${uniqueLocations.join(", ")}. Which location interests you?`;
     }
 
-    if (input.includes('feature') || input.includes('amenity')) {
-      return 'Our properties come with various features like bedrooms, bathrooms, parking, and furnished options. What specific features are you looking for?';
+    if (input.includes("feature") || input.includes("amenity")) {
+      return "Our properties come with various features like bedrooms, bathrooms, parking, and furnished options. What specific features are you looking for?";
     }
 
     // Property recommendations based on user input
-    const relevantProperties = properties.filter(property => {
-      const searchString = `${property.title} ${property.description} ${property.location.city}`.toLowerCase();
+    const relevantProperties = properties.filter((property) => {
+      const searchString =
+        `${property.title} ${property.description} ${property.location.city}`.toLowerCase();
       return searchString.includes(input);
     });
 
@@ -164,7 +172,9 @@ export function PropertyAssistant() {
     <div className="fixed bottom-4 right-4 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl">
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold">Property Assistant</h3>
-        <p className="text-sm text-gray-500">Ask me anything about properties!</p>
+        <p className="text-sm text-gray-500">
+          Ask me anything about properties!
+        </p>
       </div>
 
       <div className="h-96 overflow-y-auto p-4 space-y-4">
@@ -172,14 +182,14 @@ export function PropertyAssistant() {
           <div
             key={index}
             className={`flex ${
-              message.role === 'user' ? 'justify-end' : 'justify-start'
+              message.role === "user" ? "justify-end" : "justify-start"
             }`}
           >
             <div
               className={`max-w-[80%] rounded-lg p-3 ${
-                message.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700'
+                message.role === "user"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 dark:bg-gray-700"
               }`}
             >
               {message.content}
@@ -206,7 +216,7 @@ export function PropertyAssistant() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
             placeholder="Type your message..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
@@ -220,4 +230,4 @@ export function PropertyAssistant() {
       </div>
     </div>
   );
-} 
+}
