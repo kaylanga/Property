@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Hero } from "../components/home/Hero";
 import { PropertyGrid } from "../components/properties/PropertyGrid";
 import { AuthPopup } from "../components/auth/auth-popup";
@@ -151,8 +152,17 @@ export default function Home() {
                 className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md"
               >
                 <div className="flex items-center mb-4">
-                  <div className="h-12 w-12 rounded-full bg-gray-200 mr-4">
-                    {/* Placeholder for profile image */}
+                  <div className="h-12 w-12 rounded-full overflow-hidden mr-4">
+                    <Image
+                      src={
+                        testimonial.image ||
+                        `/images/testimonials/${index + 1}.jpg`
+                      }
+                      alt={testimonial.name}
+                      width={48}
+                      height={48}
+                      className="object-cover w-full h-full"
+                    />
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-white">
