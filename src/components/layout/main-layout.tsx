@@ -13,8 +13,9 @@
 
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { PropertyAssistant } from "../ai/property-assistant";
+import { supabase } from "../../lib/supabase-client";
 
 /**
  * Props for the MainLayout component
