@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import Link from "next/link";
+import React, { useState } from 'react';
+import Link from 'next/link';
 
 interface SetupStep {
   id: string;
@@ -15,42 +15,42 @@ interface SetupStep {
 export default function SetupGuide() {
   const [steps, setSteps] = useState<SetupStep[]>([
     {
-      id: "env",
-      title: "Set up environment variables",
-      description: "Create a .env.local file with your Supabase credentials",
+      id: 'env',
+      title: 'Set up environment variables',
+      description: 'Create a .env.local file with your Supabase credentials',
       completed:
         !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
         !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      link: "/diagnostic",
-      linkText: "Run Diagnostics",
+      link: '/diagnostic',
+      linkText: 'Run Diagnostics',
     },
     {
-      id: "database",
-      title: "Create database tables",
-      description: "Set up your Supabase database with the necessary tables",
+      id: 'database',
+      title: 'Create database tables',
+      description: 'Set up your Supabase database with the necessary tables',
       completed: false,
-      link: "https://supabase.com/dashboard",
-      linkText: "Open Supabase Dashboard",
+      link: 'https://supabase.com/dashboard',
+      linkText: 'Open Supabase Dashboard',
     },
     {
-      id: "auth",
-      title: "Configure authentication",
+      id: 'auth',
+      title: 'Configure authentication',
       description:
-        "Set up authentication in Supabase and update your application",
+        'Set up authentication in Supabase and update your application',
       completed: false,
-      link: "/login",
-      linkText: "Test Auth Flow",
+      link: '/login',
+      linkText: 'Test Auth Flow',
     },
     {
-      id: "properties",
-      title: "Add property data",
-      description: "Add your first property listings to the database",
+      id: 'properties',
+      title: 'Add property data',
+      description: 'Add your first property listings to the database',
       completed: false,
     },
     {
-      id: "styling",
-      title: "Customize styling",
-      description: "Update the design to match your brand",
+      id: 'styling',
+      title: 'Customize styling',
+      description: 'Update the design to match your brand',
       completed: false,
     },
   ]);
@@ -58,8 +58,8 @@ export default function SetupGuide() {
   const toggleStep = (id: string) => {
     setSteps(
       steps.map((step) =>
-        step.id === id ? { ...step, completed: !step.completed } : step,
-      ),
+        step.id === id ? { ...step, completed: !step.completed } : step
+      )
     );
   };
 
@@ -107,8 +107,8 @@ export default function SetupGuide() {
                   onClick={() => toggleStep(step.id)}
                   className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                     step.completed
-                      ? "bg-green-600 border-green-600 text-white"
-                      : "border-gray-300 dark:border-gray-600"
+                      ? 'bg-green-600 border-green-600 text-white'
+                      : 'border-gray-300 dark:border-gray-600'
                   }`}
                 >
                   {step.completed && (
@@ -137,7 +137,7 @@ export default function SetupGuide() {
                   <Link
                     href={step.link}
                     className="mt-2 inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                    target={step.link.startsWith("http") ? "_blank" : undefined}
+                    target={step.link.startsWith('http') ? '_blank' : undefined}
                   >
                     {step.linkText}
                     <svg

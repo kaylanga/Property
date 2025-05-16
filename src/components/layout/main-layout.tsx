@@ -11,11 +11,11 @@
  * @module main-layout
  */
 
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { PropertyAssistant } from "../ai/property-assistant";
-import { supabase } from "../../lib/supabase-client";
+import React, { useEffect, useState } from 'react';
+import { PropertyAssistant } from '../ai/property-assistant';
+import { supabase } from '../../lib/supabase-client';
 
 /**
  * Props for the MainLayout component

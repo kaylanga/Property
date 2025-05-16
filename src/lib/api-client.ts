@@ -1,6 +1,6 @@
 /**
  * API Client
- * 
+ *
  * This module provides a type-safe client for interacting with the Property Africa API.
  * It includes methods for all CRUD operations on properties and user profiles,
  * with proper error handling and response typing.
@@ -111,7 +111,7 @@ class APIClient {
    */
   private async handleResponse<T>(response: Response): Promise<APIResponse<T>> {
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw {
         message: data.message || 'An error occurred',
@@ -127,7 +127,10 @@ class APIClient {
   /**
    * Make GET request
    */
-  async get<T>(path: string, params?: Record<string, any>): Promise<APIResponse<T>> {
+  async get<T>(
+    path: string,
+    params?: Record<string, any>
+  ): Promise<APIResponse<T>> {
     const response = await fetch(this.buildURL(path, params), {
       method: 'GET',
       headers: this.getHeaders(),
@@ -178,19 +181,28 @@ const apiClient = new APIClient();
  * Property API methods
  */
 
-export async function getProperties(filter?: PropertyFilter): Promise<APIResponse<Property[]>> {
+export async function getProperties(
+  filter?: PropertyFilter
+): Promise<APIResponse<Property[]>> {
   return apiClient.get<Property[]>('/properties', filter);
 }
 
-export async function getPropertyById(id: string): Promise<APIResponse<Property>> {
+export async function getPropertyById(
+  id: string
+): Promise<APIResponse<Property>> {
   return apiClient.get<Property>(`/properties/${id}`);
 }
 
-export async function createProperty(property: Omit<Property, 'id'>): Promise<APIResponse<Property>> {
+export async function createProperty(
+  property: Omit<Property, 'id'>
+): Promise<APIResponse<Property>> {
   return apiClient.post<Property>('/properties', property);
 }
 
-export async function updateProperty(id: string, property: Partial<Property>): Promise<APIResponse<Property>> {
+export async function updateProperty(
+  id: string,
+  property: Partial<Property>
+): Promise<APIResponse<Property>> {
   return apiClient.put<Property>(`/properties/${id}`, property);
 }
 
@@ -224,7 +236,9 @@ export async function getUserProfile(): Promise<APIResponse<UserProfile>> {
   return apiClient.get<UserProfile>('/profile');
 }
 
-export async function updateUserProfile(profile: Partial<UserProfile>): Promise<APIResponse<UserProfile>> {
+export async function updateUserProfile(
+  profile: Partial<UserProfile>
+): Promise<APIResponse<UserProfile>> {
   return apiClient.put<UserProfile>('/profile', profile);
 }
 
@@ -235,4 +249,4 @@ export async function deleteUserProfile(): Promise<APIResponse<void>> {
 /**
  * Export API client instance
  */
-export default apiClient; 
+export default apiClient;

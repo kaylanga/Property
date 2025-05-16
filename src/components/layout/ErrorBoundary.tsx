@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { Component, ErrorInfo, ReactNode } from "react";
-import Link from "next/link";
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import Link from 'next/link';
 
 interface Props {
   children: ReactNode;
@@ -31,7 +31,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // You can log the error to an error reporting service
-    console.error("Error boundary caught an error:", error, errorInfo);
+    console.error('Error boundary caught an error:', error, errorInfo);
   }
 
   render(): ReactNode {
@@ -46,7 +46,7 @@ class ErrorBoundary extends Component<Props, State> {
               Something went wrong
             </h2>
             <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
-              {this.state.error?.message || "An unexpected error occurred"}
+              {this.state.error?.message || 'An unexpected error occurred'}
             </p>
             <div className="mt-8 space-y-4">
               <button

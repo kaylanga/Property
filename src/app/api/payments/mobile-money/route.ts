@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { Currency } from '../../../../types/property';
 
 // This is a mock implementation. In a real application, you would integrate
 // with actual mobile money providers' APIs (MTN Mobile Money, M-Pesa, etc.)
@@ -29,12 +28,10 @@ const mobileMoneyProviders = {
     currencies: ['TZS']
   }
 };
-    apiKey: process.env.TIGO_PESA_API_KEY,
-    countries: ['TZ'],
-    currencies: ['TZS']
-  }
-};
-    const { amount, currency, phoneNumber, provider } = await request.json();
+
+export async function POST(request: Request) {
+  try {
+    const { amount, currency, phoneNumber, provider } = await request.json() as { amount: number; currency: string; phoneNumber: string; provider: keyof typeof mobileMoneyProviders };
 
     // Validate the request
     if (!amount || !currency || !phoneNumber || !provider) {
@@ -74,4 +71,4 @@ const mobileMoneyProviders = {
       { status: 500 }
     );
   }
-} 
+}

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { VirtualTourViewer } from "../../../components/virtual-tour/VirtualTourViewer";
-import { supabase } from "../../../lib/supabase";
-import { CurrencyConverter } from "../../../components/common/currency-converter";
-import { Property } from "../../../types/property";
-import Link from "next/link";
-import Image from "next/image";
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { VirtualTourViewer } from '../../../components/virtual-tour/VirtualTourViewer';
+import { supabase } from '../../../lib/supabase';
+import { CurrencyConverter } from '../../../components/common/currency-converter';
+import { Property } from '../../../types/property';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
   HeartIcon,
   ShareIcon,
@@ -17,8 +17,8 @@ import {
   ArrowsRightLeftIcon,
   CalendarIcon,
   CheckCircleIcon,
-} from "@heroicons/react/24/outline";
-import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
+} from '@heroicons/react/24/outline';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -32,12 +32,12 @@ export default function PropertyDetailPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["property", id],
+    queryKey: ['property', id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("properties")
-        .select("*")
-        .eq("id", id)
+        .from('properties')
+        .select('*')
+        .eq('id', id)
         .single();
 
       if (error) throw error;
@@ -55,10 +55,10 @@ export default function PropertyDetailPage() {
 
       if (session) {
         const { data } = await supabase
-          .from("favorites")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .eq("property_id", id)
+          .from('favorites')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .eq('property_id', id)
           .maybeSingle();
 
         setIsFavorite(!!data);
@@ -84,7 +84,7 @@ export default function PropertyDetailPage() {
     try {
       if (!isFavorite) {
         // Add to favorites
-        await supabase.from("favorites").insert({
+        await supabase.from('favorites').insert({
           user_id: session.user.id,
           property_id: id,
           created_at: new Date().toISOString(),
@@ -92,13 +92,13 @@ export default function PropertyDetailPage() {
       } else {
         // Remove from favorites
         await supabase
-          .from("favorites")
+          .from('favorites')
           .delete()
-          .eq("user_id", session.user.id)
-          .eq("property_id", id);
+          .eq('user_id', session.user.id)
+          .eq('property_id', id);
       }
     } catch (error) {
-      console.error("Error updating favorites:", error);
+      console.error('Error updating favorites:', error);
       setIsFavorite(!isFavorite); // Revert on error
     }
   };
@@ -194,7 +194,7 @@ export default function PropertyDetailPage() {
           <div className="flex items-center text-gray-600 dark:text-gray-400">
             <MapPinIcon className="h-4 w-4 mr-1" />
             <span>
-              {property.location.address}, {property.location.city},{" "}
+              {property.location.address}, {property.location.city},{' '}
               {property.location.country}
             </span>
           </div>
@@ -205,8 +205,8 @@ export default function PropertyDetailPage() {
             onClick={toggleFavorite}
             className={`p-2 rounded-full border ${
               isFavorite
-                ? "bg-red-100 border-red-400 text-red-500 dark:bg-red-900 dark:border-red-700"
-                : "border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-400"
+                ? 'bg-red-100 border-red-400 text-red-500 dark:bg-red-900 dark:border-red-700'
+                : 'border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-400'
             }`}
           >
             {isFavorite ? (
@@ -275,7 +275,7 @@ export default function PropertyDetailPage() {
                 <div
                   key={index}
                   className={`cursor-pointer rounded-lg overflow-hidden h-24 ${
-                    activeImage === index ? "ring-2 ring-blue-600" : ""
+                    activeImage === index ? 'ring-2 ring-blue-600' : ''
                   }`}
                   onClick={() => setActiveImage(index)}
                 >
@@ -417,7 +417,7 @@ export default function PropertyDetailPage() {
               <address className="not-italic text-gray-700 dark:text-gray-300">
                 {property.location.address}
                 <br />
-                {property.location.city}, {property.location.state}{" "}
+                {property.location.city}, {property.location.state}{' '}
                 {property.location.postalCode}
                 <br />
                 {property.location.country}
@@ -451,7 +451,7 @@ export default function PropertyDetailPage() {
             <div className="flex items-center mb-6">
               <CalendarIcon className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" />
               <span className="text-gray-700 dark:text-gray-300">
-                {new Date(property.listedAt).toLocaleDateString()} -{" "}
+                {new Date(property.listedAt).toLocaleDateString()} -{' '}
                 {property.status}
               </span>
             </div>
@@ -473,8 +473,8 @@ export default function PropertyDetailPage() {
                 onClick={toggleFavorite}
                 className={`w-full py-3 px-4 font-medium rounded-lg text-center flex items-center justify-center ${
                   isFavorite
-                    ? "bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300"
-                    : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                    ? 'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300'
+                    : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
                 }`}
               >
                 {isFavorite ? (
@@ -497,7 +497,7 @@ export default function PropertyDetailPage() {
             <div className="flex items-center mb-4">
               <div className="h-16 w-16 rounded-full overflow-hidden mr-4">
                 <img
-                  src={property.agent.avatar || "/images/default-avatar.png"}
+                  src={property.agent.avatar || '/images/default-avatar.png'}
                   alt={property.agent.name}
                   className="h-full w-full object-cover"
                 />

@@ -7,11 +7,15 @@ import Link from 'next/link';
 export default function PaymentSuccess() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  );
 
   useEffect(() => {
     const paymentIntent = searchParams.get('payment_intent');
-    const paymentIntentClientSecret = searchParams.get('payment_intent_client_secret');
+    const paymentIntentClientSecret = searchParams.get(
+      'payment_intent_client_secret'
+    );
 
     if (paymentIntent && paymentIntentClientSecret) {
       // Verify the payment status
@@ -78,7 +82,8 @@ export default function PaymentSuccess() {
         <div className="text-green-600 text-6xl mb-4">✓</div>
         <h1 className="text-2xl font-bold mb-4">Payment Successful!</h1>
         <p className="text-gray-600 mb-8">
-          Thank you for your payment. Your transaction has been completed successfully.
+          Thank you for your payment. Your transaction has been completed
+          successfully.
         </p>
         <div className="space-y-4">
           <Link
@@ -97,4 +102,4 @@ export default function PaymentSuccess() {
       </div>
     </div>
   );
-} 
+}

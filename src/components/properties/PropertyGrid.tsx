@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../../lib/supabase";
-import { PropertyCard } from "./PropertyCard";
-import { PropertyFilters } from "./PropertyFilters";
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '../../lib/supabase';
+import { PropertyCard } from './PropertyCard';
+import { PropertyFilters } from './PropertyFilters';
 
 export interface PropertyGridProps {
   featured?: boolean;
@@ -13,18 +13,26 @@ export interface PropertyGridProps {
   showFilters?: boolean;
 }
 
+export interface FilterState {
+  priceRange: [number, number];
+  propertyTypes: string[];
+  bedrooms: number;
+  bathrooms: number;
+  country: string;
+}
+
 export function PropertyGrid({
   featured = false,
   limit = 6,
   country,
   showFilters = true,
 }: PropertyGridProps) {
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FilterState>({
     priceRange: [0, 1000000],
-    propertyTypes: [] as string[],
+    propertyTypes: [],
     bedrooms: 0,
     bathrooms: 0,
-    country: country || "",
+    country: country || '',
   });
 
   const {
@@ -32,33 +40,33 @@ export function PropertyGrid({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["properties", featured, filters],
+    queryKey: ['properties', featured, filters],
     queryFn: async () => {
-      let query = supabase.from("properties").select("*");
+      let query = supabase.from('properties').select('*');
 
       if (featured) {
-        query = query.eq("is_featured", true);
+        query = query.eq('is_featured', true);
       }
 
       if (filters.country) {
-        query = query.eq("location->country", filters.country);
+        query = query.eq('location->country', filters.country);
       }
 
       if (filters.propertyTypes.length > 0) {
-        query = query.in("type", filters.propertyTypes);
+        query = query.in('type', filters.propertyTypes);
       }
 
       if (filters.bedrooms > 0) {
-        query = query.gte("features->bedrooms", filters.bedrooms);
+        query = query.gte('features->bedrooms', filters.bedrooms);
       }
 
       if (filters.bathrooms > 0) {
-        query = query.gte("features->bathrooms", filters.bathrooms);
+        query = query.gte('features->bathrooms', filters.bathrooms);
       }
 
       query = query
-        .gte("pricing->listPrice", filters.priceRange[0])
-        .lte("pricing->listPrice", filters.priceRange[1])
+        .gte('pricing->listPrice', filters.priceRange[0])
+        .lte('pricing->listPrice', filters.priceRange[1])
         .limit(limit);
 
       const { data, error } = await query;
@@ -66,10 +74,13 @@ export function PropertyGrid({
       if (error) throw error;
       return data;
     },
+    onError: (err: any) => {
+      console.error('Error fetching properties:', err);
+    },
   });
 
   // Handle filter changes
-  const handleFilterChange = (newFilters: any) => {
+  const handleFilterChange = (newFilters: Partial<FilterState>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
@@ -128,7 +139,7 @@ export function PropertyGrid({
                 propertyTypes: [],
                 bedrooms: 0,
                 bathrooms: 0,
-                country: country || "",
+                country: country || '',
               })
             }
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

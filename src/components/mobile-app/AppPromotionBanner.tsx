@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 export function AppPromotionBanner() {
   const [isVisible, setIsVisible] = useState(false);
@@ -11,7 +11,7 @@ export function AppPromotionBanner() {
 
   useEffect(() => {
     // Check if the banner was previously dismissed
-    const bannerDismissed = localStorage.getItem("appBannerDismissed");
+    const bannerDismissed = localStorage.getItem('appBannerDismissed');
 
     if (!bannerDismissed) {
       // Only show after 5 seconds on the site
@@ -26,14 +26,14 @@ export function AppPromotionBanner() {
   const handleDismiss = () => {
     setIsVisible(false);
     setIsDismissed(true);
-    localStorage.setItem("appBannerDismissed", "true");
+    localStorage.setItem('appBannerDismissed', 'true');
 
     // Remove from local storage after 7 days to show again
     setTimeout(
       () => {
-        localStorage.removeItem("appBannerDismissed");
+        localStorage.removeItem('appBannerDismissed');
       },
-      7 * 24 * 60 * 60 * 1000,
+      7 * 24 * 60 * 60 * 1000
     );
   };
 

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React from "react";
-import Link from "next/link";
-import SetupGuide from "../../components/SetupGuide";
+import React from 'react';
+import Link from 'next/link';
+import SetupGuide from '../../components/SetupGuide';
 
 export default function SetupPage() {
   return (

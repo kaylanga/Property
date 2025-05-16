@@ -24,12 +24,12 @@ export async function POST(request: Request) {
     if (intent.status === 'succeeded') {
       return NextResponse.json({ success: true });
     }
-      return NextResponse.json(
-        { error: `Payment status: ${intent.status}` },
-        { status: 400 }
-      );
+    return NextResponse.json(
+      { error: `Payment status: ${intent.status}` },
+      { status: 400 }
+    );
   } catch (error) {
     console.error('Payment verification error:', error);
     return handleAPIError(error);
   }
-} 
+}

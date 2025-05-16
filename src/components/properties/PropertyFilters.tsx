@@ -1,10 +1,7 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import {
-  MagnifyingGlassIcon,
-  AdjustmentsHorizontalIcon,
-} from "@heroicons/react/24/outline";
+import React, { useState } from 'react';
+import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 
 interface PropertyFiltersProps {
   filters: {
@@ -22,25 +19,25 @@ export function PropertyFilters({
   onFilterChange,
 }: PropertyFiltersProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
   const propertyTypeOptions = [
-    { value: "apartment", label: "Apartment" },
-    { value: "house", label: "House" },
-    { value: "villa", label: "Villa" },
-    { value: "land", label: "Land" },
-    { value: "commercial", label: "Commercial" },
+    { value: 'apartment', label: 'Apartment' },
+    { value: 'house', label: 'House' },
+    { value: 'villa', label: 'Villa' },
+    { value: 'land', label: 'Land' },
+    { value: 'commercial', label: 'Commercial' },
   ];
 
   const countries = [
-    { value: "Uganda", label: "Uganda" },
-    { value: "Kenya", label: "Kenya" },
-    { value: "Tanzania", label: "Tanzania" },
-    { value: "Nigeria", label: "Nigeria" },
-    { value: "Ghana", label: "Ghana" },
-    { value: "South Africa", label: "South Africa" },
-    { value: "Egypt", label: "Egypt" },
-    { value: "Morocco", label: "Morocco" },
+    { value: 'Uganda', label: 'Uganda' },
+    { value: 'Kenya', label: 'Kenya' },
+    { value: 'Tanzania', label: 'Tanzania' },
+    { value: 'Nigeria', label: 'Nigeria' },
+    { value: 'Ghana', label: 'Ghana' },
+    { value: 'South Africa', label: 'South Africa' },
+    { value: 'Egypt', label: 'Egypt' },
+    { value: 'Morocco', label: 'Morocco' },
   ];
 
   const handlePropertyTypeChange = (type: string) => {
@@ -53,7 +50,7 @@ export function PropertyFilters({
 
   const handlePriceChange = (
     event: React.ChangeEvent<HTMLInputElement>,
-    index: number,
+    index: number
   ) => {
     const value = parseInt(event.target.value) || 0;
     const newRange = [...filters.priceRange] as [number, number];
@@ -62,9 +59,7 @@ export function PropertyFilters({
   };
 
   const handleSearch = () => {
-    // In a real implementation, this would likely use a text search on the backend
-    // For now, we're just simulating the search behavior
-    console.log("Searching for:", searchTerm);
+    console.log('Searching for:', searchTerm);
   };
 
   return (
@@ -89,24 +84,20 @@ export function PropertyFilters({
       </div>
 
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          Filters
-        </h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Filters</h3>
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
           className="flex items-center text-blue-600 hover:text-blue-700"
         >
           <AdjustmentsHorizontalIcon className="h-4 w-4 mr-1" />
-          {showAdvanced ? "Hide" : "Show"} Advanced Filters
+          {showAdvanced ? 'Hide' : 'Show'} Advanced Filters
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Country Select */}
         <div>
-          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-            Country
-          </label>
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Country</label>
           <select
             value={filters.country}
             onChange={(e) => onFilterChange({ country: e.target.value })}
@@ -123,14 +114,10 @@ export function PropertyFilters({
 
         {/* Bedrooms */}
         <div>
-          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-            Bedrooms
-          </label>
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Bedrooms</label>
           <select
             value={filters.bedrooms}
-            onChange={(e) =>
-              onFilterChange({ bedrooms: parseInt(e.target.value) })
-            }
+            onChange={(e) => onFilterChange({ bedrooms: parseInt(e.target.value) })}
             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
           >
             <option value="0">Any</option>
@@ -144,14 +131,10 @@ export function PropertyFilters({
 
         {/* Bathrooms */}
         <div>
-          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-            Bathrooms
-          </label>
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Bathrooms</label>
           <select
             value={filters.bathrooms}
-            onChange={(e) =>
-              onFilterChange({ bathrooms: parseInt(e.target.value) })
-            }
+            onChange={(e) => onFilterChange({ bathrooms: parseInt(e.target.value) })}
             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
           >
             <option value="0">Any</option>
@@ -166,9 +149,7 @@ export function PropertyFilters({
       {showAdvanced && (
         <div className="mt-6 border-t pt-6 border-gray-200 dark:border-gray-700">
           <div className="mb-6">
-            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-              Price Range
-            </label>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Price Range</label>
             <div className="flex space-x-4">
               <div className="flex-1">
                 <input
@@ -193,9 +174,7 @@ export function PropertyFilters({
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-              Property Type
-            </label>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Property Type</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
               {propertyTypeOptions.map((option) => (
                 <div
@@ -203,8 +182,8 @@ export function PropertyFilters({
                   onClick={() => handlePropertyTypeChange(option.value)}
                   className={`px-4 py-2 border rounded-lg text-center cursor-pointer transition-colors ${
                     filters.propertyTypes.includes(option.value)
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
                   {option.label}

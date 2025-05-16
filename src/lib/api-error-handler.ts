@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { handleVercelError, isVercelError } from './vercel-error-handler';
+
 export class APIError extends Error {
   constructor(
     message: string,
@@ -11,64 +12,39 @@ export class APIError extends Error {
     this.name = 'APIError';
   }
 }
-export function handleAPIError(error: unknown): NextResponse {
-  console.error('API Error:', error);
-  
-  if (isVercelError(error)) {
-    return handleVercelError(error);
+
+const errorMessages: Record<string, string> = {
+  FUNCTION_TIMEOUT: 'The function execution timed out',
+  FUNCTION_MEMORY_LIMIT: 'The function exceeded its memory limit',
+  DEPLOYMENT_ERROR: 'The deployment failed',
+  BUILD_ERROR: 'The build process failed',
+  DEPLOYMENT_TIMEOUT: 'The deployment timed out',
+  DNS_ERROR: 'A DNS error occurred',
+  DNS_TIMEOUT: 'The DNS operation timed out',
+  EDGE_NETWORK_ERROR: 'An error occurred in the edge network',
+  EDGE_TIMEOUT: 'The edge network operation timed out',
+  UNKNOWN_ERROR: 'An unexpected error occurred',
+};
+
+function getErrorMessage(error: any): string {
+  return errorMessages[error.code] || error.message || 'An unexpected error occurred';
+}
+
+function getVercelErrorStatus(code: string): number {
+  switch (code) {
+    case 'FUNCTION_TIMEOUT':
+    case 'FUNCTION_MEMORY_LIMIT':
+    case 'DEPLOYMENT_ERROR':
+    case 'BUILD_ERROR':
+    case 'DEPLOYMENT_TIMEOUT':
+    case 'DNS_ERROR':
+    case 'DNS_TIMEOUT':
+    case 'EDGE_NETWORK_ERROR':
+    case 'EDGE_TIMEOUT':
+      return 500;
+    default:
+      return 500;
   }
-  if (error instanceof APIError) {
-    return NextResponse.json(
-      {
-        success: false,
-  error: {
-          message: error.message,
-          code: error.code,
-          statusCode: error.statusCode,
-          details: error.details
-}
-      },
-      { status: error.statusCode }
-    );
-  }
-  if (error instanceof Error) {
-  return NextResponse.json(
-    {
-      success: false,
-      error: {
-          message: error.message,
-        code: 'INTERNAL_SERVER_ERROR',
-        statusCode: 500
-}
-    },
-    { status: 500 }
-  );
-}
-  return NextResponse.json(
-    {
-      success: false,
-      error: {
-        message: 'An unexpected error occurred',
-        code: 'UNKNOWN_ERROR',
-        statusCode: 500
-      }
-    },
-    { status: 500 }
-  );
-}
-    'FUNCTION_TIMEOUT': 'The function execution timed out',
-    'FUNCTION_MEMORY_LIMIT': 'The function exceeded its memory limit',
-    'DEPLOYMENT_ERROR': 'The deployment failed',
-    'BUILD_ERROR': 'The build process failed',
-    'DEPLOYMENT_TIMEOUT': 'The deployment timed out',
-    'DNS_ERROR': 'A DNS error occurred',
-    'DNS_TIMEOUT': 'The DNS operation timed out',
-    'EDGE_NETWORK_ERROR': 'An error occurred in the edge network',
-    'EDGE_TIMEOUT': 'The edge network operation timed out',
-    'UNKNOWN_ERROR': 'An unexpected error occurred'
-  };
-  
-  return messageMap[error.code] || error.message || 'An unexpected error occurred';
 }
 
 /**
@@ -77,7 +53,7 @@ export function handleAPIError(error: unknown): NextResponse {
 export function handleAPIError(error: unknown): NextResponse {
   console.error('API Error:', error);
 
-  // Handle APIError instances
+  // APIError (custom error)
   if (error instanceof APIError) {
     return NextResponse.json(
       {
@@ -86,14 +62,14 @@ export function handleAPIError(error: unknown): NextResponse {
           message: error.message,
           code: error.code,
           statusCode: error.statusCode,
-          details: error.details
-        }
+          details: error.details,
+        },
       },
       { status: error.statusCode }
     );
   }
 
-  // Handle Vercel errors
+  // Vercel errors
   if (isVercelError(error)) {
     const statusCode = getVercelErrorStatus(error.code);
     return NextResponse.json(
@@ -103,77 +79,71 @@ export function handleAPIError(error: unknown): NextResponse {
           message: getErrorMessage(error),
           code: error.code,
           statusCode,
-          details: error.details
-        }
+          details: error.details,
+        },
       },
       { status: statusCode }
     );
   }
 
-  // Handle specific error types
+  // Generic Error with a name
   if (error instanceof Error) {
-    // Handle validation errors
-    if (error.name === 'ValidationError') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            message: error.message,
-            code: 'VALIDATION_ERROR',
-            statusCode: 400,
-          }
-        },
-        { status: 400 }
-      );
-    }
+    switch (error.name) {
+      case 'ValidationError':
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              message: error.message,
+              code: 'VALIDATION_ERROR',
+              statusCode: 400,
+            },
+          },
+          { status: 400 }
+        );
 
-    // Handle authentication errors
-    if (error.name === 'AuthenticationError') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            message: error.message,
-            code: 'UNAUTHORIZED',
-            statusCode: 401,
-          }
-        },
-        { status: 401 }
-      );
-    }
+      case 'AuthenticationError':
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              message: error.message,
+              code: 'UNAUTHORIZED',
+              statusCode: 401,
+            },
+          },
+          { status: 401 }
+        );
 
-    // Handle authorization errors
-    if (error.name === 'AuthorizationError') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            message: error.message,
-            code: 'FORBIDDEN',
-            statusCode: 403,
-          }
-        },
-        { status: 403 }
-      );
-    }
+      case 'AuthorizationError':
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              message: error.message,
+              code: 'FORBIDDEN',
+              statusCode: 403,
+            },
+          },
+          { status: 403 }
+        );
 
-    // Handle not found errors
-    if (error.name === 'NotFoundError') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            message: error.message,
-            code: 'NOT_FOUND',
-            statusCode: 404,
-          }
-        },
-        { status: 404 }
-      );
+      case 'NotFoundError':
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              message: error.message,
+              code: 'NOT_FOUND',
+              statusCode: 404,
+            },
+          },
+          { status: 404 }
+        );
     }
   }
 
-  // Default error response
+  // Fallback
   return NextResponse.json(
     {
       success: false,
@@ -181,8 +151,8 @@ export function handleAPIError(error: unknown): NextResponse {
         message: 'An unexpected error occurred',
         code: 'INTERNAL_SERVER_ERROR',
         statusCode: 500,
-      }
+      },
     },
     { status: 500 }
   );
-} 
+}

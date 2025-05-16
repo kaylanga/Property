@@ -5,35 +5,39 @@
  * in the real estate marketplace.
  */
 
+// ───────────── Enums ─────────────
+
 export enum PropertyType {
-  Apartment = "apartment",
-  House = "house",
-  Villa = "villa",
-  Land = "land",
-  Commercial = "commercial",
-  OfficeSpace = "office",
-  Warehouse = "warehouse",
-  Hotel = "hotel",
+  Apartment = 'apartment',
+  House = 'house',
+  Villa = 'villa',
+  Land = 'land',
+  Commercial = 'commercial',
+  OfficeSpace = 'office',
+  Warehouse = 'warehouse',
+  Hotel = 'hotel',
 }
 
 export enum Currency {
-  UGX = "UGX", // Ugandan Shilling
-  KES = "KES", // Kenyan Shilling
-  TZS = "TZS", // Tanzanian Shilling
-  NGN = "NGN", // Nigerian Naira
-  GHS = "GHS", // Ghanaian Cedi
-  ZAR = "ZAR", // South African Rand
-  USD = "USD", // US Dollar
-  EUR = "EUR", // Euro
+  UGX = 'UGX',
+  KES = 'KES',
+  TZS = 'TZS',
+  NGN = 'NGN',
+  GHS = 'GHS',
+  ZAR = 'ZAR',
+  USD = 'USD',
+  EUR = 'EUR',
 }
 
 export enum PropertyStatus {
-  Available = "available",
-  Pending = "pending",
-  Sold = "sold",
-  Rented = "rented",
-  UnderConstruction = "under-construction",
+  Available = 'available',
+  Pending = 'pending',
+  Sold = 'sold',
+  Rented = 'rented',
+  UnderConstruction = 'under-construction',
 }
+
+// ───────────── Interfaces ─────────────
 
 export interface PropertyLocation {
   address: string;
@@ -41,8 +45,8 @@ export interface PropertyLocation {
   state: string;
   postalCode?: string;
   country: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface PropertyPricing {
@@ -50,11 +54,11 @@ export interface PropertyPricing {
   currency: Currency;
   pricePerSqFt?: number;
   rentalPrice?: number;
-  rentalPeriod?: "daily" | "weekly" | "monthly" | "yearly";
+  rentalPeriod?: 'daily' | 'weekly' | 'monthly' | 'yearly';
   maintenanceFee?: number;
   propertyTax?: number;
   discount?: number;
-  negotiable: boolean;
+  negotiable?: boolean;
 }
 
 export interface PropertyFeatures {
@@ -64,14 +68,14 @@ export interface PropertyFeatures {
   lotSize?: number;
   yearBuilt?: number;
   parking?: number;
-  furnished: boolean;
-  amenities: string[];
+  furnished?: boolean;
+  amenities?: string[];
   accessibility?: string[];
   energyRating?: string;
 }
 
 export interface PropertyMedia {
-  images: {
+  images?: {
     url: string;
     caption?: string;
     isPrimary?: boolean;
@@ -111,6 +115,7 @@ export interface PropertyAgent {
 
 export interface Property {
   id: string;
+  aiScore: number;
   title: string;
   description: string;
   type: PropertyType;
@@ -118,7 +123,7 @@ export interface Property {
   location: PropertyLocation;
   pricing: PropertyPricing;
   features: PropertyFeatures;
-  media: PropertyMedia;
+  media?: PropertyMedia;
   agent: PropertyAgent;
   listedAt: string;
   updatedAt: string;
@@ -131,6 +136,8 @@ export interface Property {
   };
   metadata?: Record<string, any>;
 }
+
+// ───────────── Additional Types ─────────────
 
 export interface PropertyAlert {
   id: string;
@@ -145,7 +152,7 @@ export interface PropertyAlert {
     features?: string[];
   };
   isActive: boolean;
-  notificationFrequency: "daily" | "weekly" | "monthly";
+  notificationFrequency: 'daily' | 'weekly' | 'monthly';
   createdAt: string;
   updatedAt: string;
   lastNotificationAt?: string;
@@ -169,7 +176,7 @@ export interface PropertyVisit {
   propertyId: string;
   userId: string;
   scheduledAt: string;
-  status: "pending" | "confirmed" | "cancelled" | "completed";
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   notes?: string;
   createdAt: string;
   updatedAt: string;

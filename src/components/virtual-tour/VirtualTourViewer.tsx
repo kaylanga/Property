@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import { Property } from "../../types/property";
+import React, { useState, useEffect, useRef } from 'react';
+import { Property } from '../../types/property';
 
 interface VirtualTourViewerProps {
   property: Property;
@@ -19,9 +19,9 @@ export function VirtualTourViewer({ property }: VirtualTourViewerProps) {
       setFullscreen(!!document.fullscreenElement);
     };
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
 
@@ -33,6 +33,7 @@ export function VirtualTourViewer({ property }: VirtualTourViewerProps) {
     }
   };
 
+  // If no virtual tour URL is provided, show a fallback message.
   if (!tourUrl) {
     return (
       <div className="relative h-[450px] bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-lg">
@@ -71,7 +72,7 @@ export function VirtualTourViewer({ property }: VirtualTourViewerProps) {
   return (
     <div className="relative">
       <div
-        className={`relative ${tourLoaded ? "" : "bg-gray-100 dark:bg-gray-800"} rounded-lg overflow-hidden h-[450px]`}
+        className={`relative ${tourLoaded ? '' : 'bg-gray-100 dark:bg-gray-800'} rounded-lg overflow-hidden h-[450px]`}
       >
         {!tourLoaded && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -95,7 +96,7 @@ export function VirtualTourViewer({ property }: VirtualTourViewerProps) {
         <button
           onClick={toggleFullscreen}
           className="p-2 bg-black/70 text-white rounded-md hover:bg-black/90 transition-colors"
-          aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          aria-label={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
         >
           {fullscreen ? (
             <svg

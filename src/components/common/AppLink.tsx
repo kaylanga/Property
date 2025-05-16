@@ -1,5 +1,5 @@
-import React, { ComponentProps, forwardRef } from "react";
-import NextLink from "next/link";
+import React, { ComponentProps, forwardRef } from 'react';
+import NextLink from 'next/link';
 
 type AppLinkProps = ComponentProps<typeof NextLink> & {
   className?: string;
@@ -19,9 +19,9 @@ export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
         {children}
       </NextLink>
     );
-  },
+  }
 );
 
-AppLink.displayName = "AppLink";
+AppLink.displayName = 'AppLink';
 
 export default AppLink;

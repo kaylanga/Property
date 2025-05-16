@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { useEffect } from "react";
-import Link from "next/link";
+import React, { useEffect } from 'react';
+import Link from 'next/link';
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -11,7 +11,7 @@ interface ErrorProps {
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
     // Log the error to an error reporting service
-    console.error("Application error:", error);
+    console.error('Application error:', error);
   }, [error]);
 
   return (
@@ -24,7 +24,7 @@ export default function Error({ error, reset }: ErrorProps) {
           Something went wrong
         </h2>
         <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
-          {error.message || "An unexpected error occurred"}
+          {error.message || 'An unexpected error occurred'}
         </p>
         {error.digest && (
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">

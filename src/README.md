@@ -31,17 +31,20 @@ A modern real estate platform focused on the East African market, particularly U
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/property-africa.git
    cd property-africa
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Create a `.env.local` file in the root directory with the following variables:
+
    ```
    # Supabase Configuration
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
@@ -62,6 +65,7 @@ A modern real estate platform focused on the East African market, particularly U
    ```
 
 4. Run the development server:
+
    ```bash
    npm run dev
    ```
@@ -94,4 +98,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [Next.js](https://nextjs.org/)
 - [Supabase](https://supabase.io/)
 - [Stripe](https://stripe.com/)
-- [Tailwind CSS](https://tailwindcss.com/) 
+- [Tailwind CSS](https://tailwindcss.com/)

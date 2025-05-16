@@ -14,18 +14,20 @@
     "jsx": "preserve",
     "incremental": true,
     "allowJs": true,
-    "types": ["@supabase/supabase-js"],
+    "types": ["@supabase/supabase-js", "node"],
+    "baseUrl": ".", // ✅ ensures paths work from project root
+    "paths": {
+      "@/*": ["src/*"] // ✅ resolves '@/lib/supabase' to 'src/lib/supabase.ts'
+    },
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    ]
   },
   "include": [
     "next-env.d.ts",
+    "src",           // ✅ include source folder
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"

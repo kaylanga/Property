@@ -82,4 +82,4 @@ export interface VerificationRequest {
   status: 'pending' | 'approved' | 'rejected';
   createdAt: Date;
   updatedAt: Date;
-} 
+}

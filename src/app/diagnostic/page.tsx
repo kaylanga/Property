@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { supabase } from "../../lib/supabase-client";
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase-client';
 
 export default function DiagnosticPage() {
-  const [uiCheck, setUiCheck] = useState<"loading" | "success" | "error">(
-    "loading",
+  const [uiCheck, setUiCheck] = useState<'loading' | 'success' | 'error'>(
+    'loading'
   );
-  const [apiCheck, setApiCheck] = useState<"loading" | "success" | "error">(
-    "loading",
+  const [apiCheck, setApiCheck] = useState<'loading' | 'success' | 'error'>(
+    'loading'
   );
-  const [dbCheck, setDbCheck] = useState<"loading" | "success" | "error">(
-    "loading",
+  const [dbCheck, setDbCheck] = useState<'loading' | 'success' | 'error'>(
+    'loading'
   );
   const [dbMessage, setDbMessage] = useState<string>(
-    "Checking Supabase connection...",
+    'Checking Supabase connection...'
   );
   const [apiMessage, setApiMessage] = useState<string>(
-    "Checking API connectivity...",
+    'Checking API connectivity...'
   );
   const [propertyCount, setPropertyCount] = useState<number | null>(null);
   const [environmentVars, setEnvironmentVars] = useState<{
@@ -28,10 +28,10 @@ export default function DiagnosticPage() {
   useEffect(() => {
     try {
       // Simple test to verify React is rendering correctly
-      setUiCheck("success");
+      setUiCheck('success');
     } catch (error) {
-      console.error("UI rendering error:", error);
-      setUiCheck("error");
+      console.error('UI rendering error:', error);
+      setUiCheck('error');
     }
   }, []);
 
@@ -51,8 +51,8 @@ export default function DiagnosticPage() {
       try {
         // Test query to verify database connection
         const { data, error, count } = await supabase
-          .from("properties")
-          .select("*", { count: "exact" })
+          .from('properties')
+          .select('*', { count: 'exact' })
           .limit(1);
 
         if (error) {
@@ -60,14 +60,14 @@ export default function DiagnosticPage() {
         }
 
         setPropertyCount(count);
-        setDbCheck("success");
+        setDbCheck('success');
         setDbMessage(
-          `Successfully connected to Supabase. Found ${count} properties.`,
+          `Successfully connected to Supabase. Found ${count} properties.`
         );
       } catch (error: any) {
-        console.error("Database error:", error);
-        setDbCheck("error");
-        setDbMessage(`Database error: ${error.message || "Unknown error"}`);
+        console.error('Database error:', error);
+        setDbCheck('error');
+        setDbMessage(`Database error: ${error.message || 'Unknown error'}`);
       }
     }
 
@@ -79,26 +79,26 @@ export default function DiagnosticPage() {
     async function checkApi() {
       try {
         // Try to fetch from an API route to verify server connectivity
-        const response = await fetch("/api/health-check");
+        const response = await fetch('/api/health-check');
 
         if (!response.ok) {
           throw new Error(`API responded with status: ${response.status}`);
         }
 
         const data = await response.json();
-        setApiCheck("success");
-        setApiMessage("API endpoints are working properly.");
+        setApiCheck('success');
+        setApiMessage('API endpoints are working properly.');
       } catch (error: any) {
-        console.error("API error:", error);
-        setApiCheck("error");
+        console.error('API error:', error);
+        setApiCheck('error');
         setApiMessage(
-          `API error: ${error.message || "Unable to connect to API endpoints"}`,
+          `API error: ${error.message || 'Unable to connect to API endpoints'}`
         );
 
         // If API route doesn't exist, we'll still create a health check
-        if (error.message.includes("404")) {
+        if (error.message.includes('404')) {
           setApiMessage(
-            "API health check endpoint not found. Consider creating one at /api/health-check",
+            'API health check endpoint not found. Consider creating one at /api/health-check'
           );
         }
       }
@@ -132,14 +132,14 @@ export default function DiagnosticPage() {
             <div className="flex items-center">
               <div
                 className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${
-                  uiCheck === "loading"
-                    ? "bg-gray-200 dark:bg-gray-700"
-                    : uiCheck === "success"
-                      ? "bg-green-100 dark:bg-green-900"
-                      : "bg-red-100 dark:bg-red-900"
+                  uiCheck === 'loading'
+                    ? 'bg-gray-200 dark:bg-gray-700'
+                    : uiCheck === 'success'
+                      ? 'bg-green-100 dark:bg-green-900'
+                      : 'bg-red-100 dark:bg-red-900'
                 }`}
               >
-                {uiCheck === "loading" ? (
+                {uiCheck === 'loading' ? (
                   <svg
                     className="animate-spin h-5 w-5 text-gray-500 dark:text-gray-400"
                     xmlns="http://www.w3.org/2000/svg"
@@ -160,7 +160,7 @@ export default function DiagnosticPage() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                ) : uiCheck === "success" ? (
+                ) : uiCheck === 'success' ? (
                   <svg
                     className="h-5 w-5 text-green-500 dark:text-green-400"
                     xmlns="http://www.w3.org/2000/svg"
@@ -192,13 +192,13 @@ export default function DiagnosticPage() {
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                  {uiCheck === "loading"
-                    ? "Checking UI..."
-                    : uiCheck === "success"
-                      ? "UI components are rendering correctly"
-                      : "UI rendering issue detected"}
+                  {uiCheck === 'loading'
+                    ? 'Checking UI...'
+                    : uiCheck === 'success'
+                      ? 'UI components are rendering correctly'
+                      : 'UI rendering issue detected'}
                 </h3>
-                {uiCheck === "success" && (
+                {uiCheck === 'success' && (
                   <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                     <p>
                       React is working properly. This diagnostic page is proof!
@@ -226,8 +226,8 @@ export default function DiagnosticPage() {
                   <div
                     className={`flex-shrink-0 h-6 w-6 rounded-full flex items-center justify-center ${
                       exists
-                        ? "bg-green-100 dark:bg-green-900"
-                        : "bg-red-100 dark:bg-red-900"
+                        ? 'bg-green-100 dark:bg-green-900'
+                        : 'bg-red-100 dark:bg-red-900'
                     }`}
                   >
                     {exists ? (
@@ -264,8 +264,8 @@ export default function DiagnosticPage() {
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {exists
-                        ? "Present"
-                        : "Missing - Add this to your .env.local file"}
+                        ? 'Present'
+                        : 'Missing - Add this to your .env.local file'}
                     </p>
                   </div>
                 </li>
@@ -287,14 +287,14 @@ export default function DiagnosticPage() {
             <div className="flex items-center">
               <div
                 className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${
-                  dbCheck === "loading"
-                    ? "bg-gray-200 dark:bg-gray-700"
-                    : dbCheck === "success"
-                      ? "bg-green-100 dark:bg-green-900"
-                      : "bg-red-100 dark:bg-red-900"
+                  dbCheck === 'loading'
+                    ? 'bg-gray-200 dark:bg-gray-700'
+                    : dbCheck === 'success'
+                      ? 'bg-green-100 dark:bg-green-900'
+                      : 'bg-red-100 dark:bg-red-900'
                 }`}
               >
-                {dbCheck === "loading" ? (
+                {dbCheck === 'loading' ? (
                   <svg
                     className="animate-spin h-5 w-5 text-gray-500 dark:text-gray-400"
                     xmlns="http://www.w3.org/2000/svg"
@@ -315,7 +315,7 @@ export default function DiagnosticPage() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                ) : dbCheck === "success" ? (
+                ) : dbCheck === 'success' ? (
                   <svg
                     className="h-5 w-5 text-green-500 dark:text-green-400"
                     xmlns="http://www.w3.org/2000/svg"
@@ -347,23 +347,23 @@ export default function DiagnosticPage() {
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                  {dbCheck === "loading"
-                    ? "Checking database..."
-                    : dbCheck === "success"
-                      ? "Database connection successful"
-                      : "Database connection issue"}
+                  {dbCheck === 'loading'
+                    ? 'Checking database...'
+                    : dbCheck === 'success'
+                      ? 'Database connection successful'
+                      : 'Database connection issue'}
                 </h3>
                 <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                   <p>{dbMessage}</p>
-                  {dbCheck === "success" && propertyCount !== null && (
+                  {dbCheck === 'success' && propertyCount !== null && (
                     <p className="mt-1">
                       Your database has {propertyCount} properties in the
                       'properties' table.
                       {propertyCount === 0 &&
-                        " You may want to add some test data."}
+                        ' You may want to add some test data.'}
                     </p>
                   )}
-                  {dbCheck === "error" && (
+                  {dbCheck === 'error' && (
                     <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                       <p className="text-sm text-red-700 dark:text-red-300">
                         1. Check that your Supabase URL and Anon Key are correct
@@ -395,14 +395,14 @@ export default function DiagnosticPage() {
             <div className="flex items-center">
               <div
                 className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${
-                  apiCheck === "loading"
-                    ? "bg-gray-200 dark:bg-gray-700"
-                    : apiCheck === "success"
-                      ? "bg-green-100 dark:bg-green-900"
-                      : "bg-red-100 dark:bg-red-900"
+                  apiCheck === 'loading'
+                    ? 'bg-gray-200 dark:bg-gray-700'
+                    : apiCheck === 'success'
+                      ? 'bg-green-100 dark:bg-green-900'
+                      : 'bg-red-100 dark:bg-red-900'
                 }`}
               >
-                {apiCheck === "loading" ? (
+                {apiCheck === 'loading' ? (
                   <svg
                     className="animate-spin h-5 w-5 text-gray-500 dark:text-gray-400"
                     xmlns="http://www.w3.org/2000/svg"
@@ -423,7 +423,7 @@ export default function DiagnosticPage() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                ) : apiCheck === "success" ? (
+                ) : apiCheck === 'success' ? (
                   <svg
                     className="h-5 w-5 text-green-500 dark:text-green-400"
                     xmlns="http://www.w3.org/2000/svg"
@@ -455,11 +455,11 @@ export default function DiagnosticPage() {
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                  {apiCheck === "loading"
-                    ? "Checking API endpoints..."
-                    : apiCheck === "success"
-                      ? "API endpoints are working"
-                      : "API connectivity issue"}
+                  {apiCheck === 'loading'
+                    ? 'Checking API endpoints...'
+                    : apiCheck === 'success'
+                      ? 'API endpoints are working'
+                      : 'API connectivity issue'}
                 </h3>
                 <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                   <p>{apiMessage}</p>
@@ -483,16 +483,16 @@ export default function DiagnosticPage() {
                   Set up your Supabase environment variables in .env.local
                 </li>
               )}
-              {dbCheck === "error" && (
+              {dbCheck === 'error' && (
                 <li>
                   Fix your database connection issues according to the error
                   message
                 </li>
               )}
-              {dbCheck === "success" && propertyCount === 0 && (
+              {dbCheck === 'success' && propertyCount === 0 && (
                 <li>Add some property data to your Supabase database</li>
               )}
-              {apiCheck === "error" && apiMessage.includes("not found") && (
+              {apiCheck === 'error' && apiMessage.includes('not found') && (
                 <li>Create an API health check endpoint</li>
               )}
               <li>Add more content to your homepage and verify routing</li>

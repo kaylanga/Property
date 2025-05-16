@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import Image from "next/image";
-import { PropertySearch } from "../properties/property-search";
-import { AfricaMap } from "./AfricaMap";
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { PropertySearch } from '../properties/property-search';
+import { AfricaMap } from './AfricaMap';
 
 export function Hero() {
   const [activeCountry, setActiveCountry] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export function Hero() {
       <div className="container mx-auto px-4 py-20 flex flex-col lg:flex-row items-center gap-12">
         <div className="lg:w-1/2 z-10">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            Discover Your Dream Property in{" "}
+            Discover Your Dream Property in{' '}
             <span className="text-yellow-400">Africa</span>
           </h1>
           <p className="text-xl mb-8 max-w-lg">
@@ -36,32 +36,32 @@ export function Hero() {
 
             <div className="mt-4 flex flex-wrap gap-2">
               <button
-                onClick={() => setActiveCountry("Uganda")}
-                className={`px-3 py-1 rounded-full text-sm ${activeCountry === "Uganda" ? "bg-yellow-500 text-blue-900" : "bg-white/20"}`}
+                onClick={() => setActiveCountry('Uganda')}
+                className={`px-3 py-1 rounded-full text-sm ${activeCountry === 'Uganda' ? 'bg-yellow-500 text-blue-900' : 'bg-white/20'}`}
               >
                 Uganda
               </button>
               <button
-                onClick={() => setActiveCountry("Kenya")}
-                className={`px-3 py-1 rounded-full text-sm ${activeCountry === "Kenya" ? "bg-yellow-500 text-blue-900" : "bg-white/20"}`}
+                onClick={() => setActiveCountry('Kenya')}
+                className={`px-3 py-1 rounded-full text-sm ${activeCountry === 'Kenya' ? 'bg-yellow-500 text-blue-900' : 'bg-white/20'}`}
               >
                 Kenya
               </button>
               <button
-                onClick={() => setActiveCountry("Tanzania")}
-                className={`px-3 py-1 rounded-full text-sm ${activeCountry === "Tanzania" ? "bg-yellow-500 text-blue-900" : "bg-white/20"}`}
+                onClick={() => setActiveCountry('Tanzania')}
+                className={`px-3 py-1 rounded-full text-sm ${activeCountry === 'Tanzania' ? 'bg-yellow-500 text-blue-900' : 'bg-white/20'}`}
               >
                 Tanzania
               </button>
               <button
-                onClick={() => setActiveCountry("Nigeria")}
-                className={`px-3 py-1 rounded-full text-sm ${activeCountry === "Nigeria" ? "bg-yellow-500 text-blue-900" : "bg-white/20"}`}
+                onClick={() => setActiveCountry('Nigeria')}
+                className={`px-3 py-1 rounded-full text-sm ${activeCountry === 'Nigeria' ? 'bg-yellow-500 text-blue-900' : 'bg-white/20'}`}
               >
                 Nigeria
               </button>
               <button
-                onClick={() => setActiveCountry("Ghana")}
-                className={`px-3 py-1 rounded-full text-sm ${activeCountry === "Ghana" ? "bg-yellow-500 text-blue-900" : "bg-white/20"}`}
+                onClick={() => setActiveCountry('Ghana')}
+                className={`px-3 py-1 rounded-full text-sm ${activeCountry === 'Ghana' ? 'bg-yellow-500 text-blue-900' : 'bg-white/20'}`}
               >
                 Ghana
               </button>

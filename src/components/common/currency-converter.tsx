@@ -1,17 +1,17 @@
 /**
  * Currency Converter Component
- * 
+ *
  * A reusable component that converts property prices between different currencies.
  * Automatically detects the user's location and preferred currency, with fallback to USD.
  * Supports multiple African currencies including UGX, KES, TZS, RWF, and USD.
- * 
+ *
  * Exchange rates are relative to UGX (Ugandan Shilling) as the base currency.
  * The component handles:
  * - Automatic currency detection based on user's location
  * - Currency preference persistence in cookies
  * - Real-time currency conversion
  * - Proper currency formatting using Intl.NumberFormat
- * 
+ *
  * @module currency-converter
  */
 
@@ -40,26 +40,26 @@ interface CurrencyConverterProps {
  */
 const exchangeRates: Record<Currency, number> = {
   [Currency.UGX]: 1,
-  [Currency.KES]: 0.041,  // 1 UGX = 0.041 KES
-  [Currency.TZS]: 0.63,   // 1 UGX = 0.63 TZS
-  [Currency.RWF]: 0.32,   // 1 UGX = 0.32 RWF
-  [Currency.USD]: 0.00027 // 1 UGX = 0.00027 USD
+  [Currency.KES]: 0.041, // 1 UGX = 0.041 KES
+  [Currency.TZS]: 0.63, // 1 UGX = 0.63 TZS
+  [Currency.RWF]: 0.32, // 1 UGX = 0.32 RWF
+  [Currency.USD]: 0.00027, // 1 UGX = 0.00027 USD
 };
 
 /**
  * CurrencyConverter Component
- * 
+ *
  * Converts property prices between different currencies based on:
  * - User's detected location (via IP)
  * - Stored preference in cookies
  * - Fallback to USD if detection fails
- * 
+ *
  * Features:
  * - Automatic currency detection
  * - Persistent currency preference
  * - Real-time conversion
  * - Proper currency formatting
- * 
+ *
  * @param {CurrencyConverterProps} props - Component props
  * @returns {JSX.Element} Formatted currency amount in user's preferred currency
  */
@@ -78,10 +78,13 @@ export function CurrencyConverter({
         // First try to get from cookies
         const storedCurrency = document.cookie
           .split('; ')
-          .find(row => row.startsWith('userCurrency='))
+          .find((row) => row.startsWith('userCurrency='))
           ?.split('=')[1] as Currency;
 
-        if (storedCurrency && Object.values(Currency).includes(storedCurrency)) {
+        if (
+          storedCurrency &&
+          Object.values(Currency).includes(storedCurrency)
+        ) {
           setUserCurrency(storedCurrency);
           return;
         }
@@ -89,7 +92,7 @@ export function CurrencyConverter({
         // If not in cookies, try to get from browser
         const response = await fetch('https://ipapi.co/json/');
         const data = await response.json();
-        
+
         // Map country codes to currencies
         const countryToCurrency: Record<string, Currency> = {
           UG: Currency.UGX,
@@ -98,7 +101,8 @@ export function CurrencyConverter({
           RW: Currency.RWF,
         };
 
-        const detectedCurrency = countryToCurrency[data.country_code] || Currency.USD;
+        const detectedCurrency =
+          countryToCurrency[data.country_code] || Currency.USD;
         setUserCurrency(detectedCurrency);
 
         // Store in cookies for 30 days
@@ -114,13 +118,14 @@ export function CurrencyConverter({
 
   useEffect(() => {
     // Convert amount when currencies change
-    const converted = amount * (exchangeRates[userCurrency] / exchangeRates[fromCurrency]);
+    const converted =
+      amount * (exchangeRates[userCurrency] / exchangeRates[fromCurrency]);
     setConvertedAmount(converted);
   }, [amount, fromCurrency, userCurrency]);
 
   /**
    * Formats a number as currency using the browser's Intl API
-   * 
+   *
    * @param {number} amount - The amount to format
    * @param {Currency} currency - The currency code
    * @returns {string} Formatted currency string
@@ -139,4 +144,4 @@ export function CurrencyConverter({
       {formatCurrency(convertedAmount, userCurrency)}
     </span>
   );
-} 
+}
