@@ -21,7 +21,7 @@ import { handleAPIError } from '@/lib/api-error-handler';
  * @param {NextRequest} request - The incoming request
  * @returns {NextResponse} The user's profile data or an error response
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Create a Supabase client for the server-side route handler
     const supabase = createRouteHandlerClient({ cookies });
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     if (error) throw error;
 
     // Return the profile data, excluding sensitive fields
-    const { password_hash, ...safeProfile } = data;
+    const { password_hash: _password_hash, ...safeProfile } = data;
     return NextResponse.json(safeProfile);
   } catch (error) {
     return handleAPIError(error);
@@ -88,7 +88,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Remove any sensitive fields that shouldn't be updated through this endpoint
-    const { id, role, is_verified, ...safeUpdates } = updates;
+    const { id: _id, role: _role, is_verified: _is_verified, ...safeUpdates } = updates;
 
     // Update the user's profile in the database
     const { data, error } = await supabase
@@ -101,7 +101,7 @@ export async function PUT(request: NextRequest) {
     if (error) throw error;
 
     // Return the updated profile data, excluding sensitive fields
-    const { password_hash, ...safeProfile } = data;
+    const { password_hash: _password_hash, ...safeProfile } = data;
     return NextResponse.json(safeProfile);
   } catch (error) {
     return handleAPIError(error);
@@ -115,7 +115,7 @@ export async function PUT(request: NextRequest) {
  * @param {NextRequest} request - The incoming request
  * @returns {NextResponse} A success message or an error response
  */
-export async function DELETE(request: NextRequest) {
+export async function DELETE(_request: NextRequest) {
   try {
     // Create a Supabase client for the server-side route handler
     const supabase = createRouteHandlerClient({ cookies });

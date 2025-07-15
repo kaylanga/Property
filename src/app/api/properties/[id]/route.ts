@@ -24,15 +24,15 @@ import { handleAPIError } from '@/lib/api-error-handler';
  * @returns {NextResponse} The property data or an error response
  */
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Create a Supabase client for the server-side route handler
     const supabase = createRouteHandlerClient({ cookies });
 
     // Get the property ID from the route parameters
-    const { id } = params;
+    const { id } = await params;
 
     // Fetch the property from the database
     const { data, error } = await supabase
@@ -66,7 +66,7 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Create a Supabase client for the server-side route handler
@@ -84,7 +84,7 @@ export async function PUT(
     }
 
     // Get the property ID from the route parameters
-    const { id } = params;
+    const { id } = await params;
 
     // Parse the request body
     const updates = await request.json();
@@ -118,7 +118,7 @@ export async function PUT(
     }
 
     // Remove any sensitive fields that shouldn't be updated through this endpoint
-    const { id: _, agentId, createdAt, ...safeUpdates } = updates;
+    const { id: _id, agentId: _agentId, createdAt: _createdAt, ...safeUpdates } = updates;
 
     // Add the updated timestamp
     const propertyUpdates = {
@@ -152,8 +152,8 @@ export async function PUT(
  * @returns {NextResponse} A success message or an error response
  */
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Create a Supabase client for the server-side route handler
@@ -171,7 +171,7 @@ export async function DELETE(
     }
 
     // Get the property ID from the route parameters
-    const { id } = params;
+    const { id } = await params;
 
     // Check if the property exists and belongs to the current user
     const { data: existingProperty, error: fetchError } = await supabase
