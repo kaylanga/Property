@@ -29,7 +29,7 @@ export async function GET() {
         );
 
         // Run a simple query to test connectivity
-        const { data, error } = await supabase
+        const { data: _data, error } = await supabase
           .from('properties')
           .select('id')
           .limit(1);
