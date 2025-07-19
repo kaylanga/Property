@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Property } from '@/types/property';
-import { Loader2, Send } from 'lucide-react';
+import { ArrowUpIcon as Send, ArrowPathIcon } from '@heroicons/react/24/outline';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -176,7 +176,7 @@ export function PropertyAssistant() {
 
         {isTyping && (
           <div className="flex items-center justify-start space-x-2 text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <ArrowPathIcon className="h-4 w-4 animate-spin" />
             <span className="text-sm">Analyzing properties...</span>
           </div>
         )}

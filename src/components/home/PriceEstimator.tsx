@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Icon } from '../ui/Icon';
-import { Settings2, MapPin, Square, Bed, Bath, ArrowRight, Share2, CheckCircle } from 'lucide-react';
+import { AdjustmentsHorizontalIcon as Settings2, MapPinIcon as MapPin, SquaresPlusIcon as Square, HomeIcon as Bed, TvIcon as Bath, ArrowRightIcon as ArrowRight, ShareIcon as Share2, CheckCircleIcon as CheckCircle } from '@heroicons/react/24/outline';
 import { cn } from '../../lib/utils';
 
 interface FieldErrors {
