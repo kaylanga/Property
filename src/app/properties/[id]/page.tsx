@@ -21,7 +21,8 @@ import {
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 
 export default function PropertyDetailPage() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id as string;
   const [activeImage, setActiveImage] = useState(0);
   const [showVirtualTour, setShowVirtualTour] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -238,12 +239,13 @@ export default function PropertyDetailPage() {
               View Photos
             </button>
           </div>
-        ) : (
+        ) : property.media?.images?.length ? (
           <div>
             <div className="relative h-[450px] rounded-lg overflow-hidden mb-4">
-              <img
+              <Image
                 src={property.media.images[activeImage].url}
                 alt={`${property.title} - Image ${activeImage + 1}`}
+                fill
                 className="w-full h-full object-cover"
               />
 
@@ -282,7 +284,8 @@ export default function PropertyDetailPage() {
                   <img
                     src={image.url}
                     alt={`${property.title} - Image ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    layout="fill"
+                    className="object-cover w-full h-full"
                   />
                 </div>
               ))}

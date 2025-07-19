@@ -1,6 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -13,9 +12,16 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
 // Server-side Supabase client factory
-export const createSupabaseServerClient = () => {
+export const createSupabaseServerClient = async () => {
+  const { cookies } = await import('next/headers');
+  const cookieStore = cookies();
+  
   return createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies,
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value;
+      },
+    },
   });
 };
 
@@ -24,7 +30,7 @@ export const createSupabaseServerClient = () => {
 // ───────────────────────────────
 
 export const getCurrentUser = async () => {
-  const supabaseServer = createSupabaseServerClient();
+  const supabaseServer = await createSupabaseServerClient();
   const {
     data: { user },
     error,

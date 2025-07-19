@@ -25,14 +25,14 @@ import { handleAPIError } from '@/lib/api-error-handler';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Create a Supabase client for the server-side route handler
     const supabase = createRouteHandlerClient({ cookies });
 
     // Get the property ID from the route parameters
-    const { id } = params;
+    const { id } = await params;
 
     // Fetch the property from the database
     const { data, error } = await supabase
@@ -66,7 +66,7 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Create a Supabase client for the server-side route handler
@@ -84,7 +84,7 @@ export async function PUT(
     }
 
     // Get the property ID from the route parameters
-    const { id } = params;
+    const { id } = await params;
 
     // Parse the request body
     const updates = await request.json();
@@ -153,7 +153,7 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Create a Supabase client for the server-side route handler
@@ -171,7 +171,7 @@ export async function DELETE(
     }
 
     // Get the property ID from the route parameters
-    const { id } = params;
+    const { id } = await params;
 
     // Check if the property exists and belongs to the current user
     const { data: existingProperty, error: fetchError } = await supabase

@@ -1,13 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 
-export const AuthPopup = () => {
-  const [isOpen, setIsOpen] = useState(true);
+interface AuthPopupProps {
+  onClose: () => void;
+}
+
+export const AuthPopup = ({ onClose }: AuthPopupProps) => {
+  const handleClose = () => {
+    onClose();
+  };
 
   return (
-    <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
+    <Dialog open={true} onClose={handleClose} className="relative z-50">
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
 
@@ -29,7 +34,7 @@ export const AuthPopup = () => {
 
           {/* Close Button */}
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={handleClose}
             className="w-full px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded"
           >
             Close

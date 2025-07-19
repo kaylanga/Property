@@ -1,8 +1,8 @@
 'use client';
 
-import { motion } from '@motionone/react';
+import { motion } from 'framer-motion';
 
-// Motion One components
+// Framer Motion components
 export const MotionDiv = motion.div;
 export const MotionSection = motion.section;
 export const MotionButton = motion.button;
@@ -11,7 +11,7 @@ export const MotionButton = motion.button;
 export function MotionExample() {
   return (
     <MotionDiv initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <h1>Motion One Example Component</h1>
+      <h1>Framer Motion Example Component</h1>
     </MotionDiv>
   );
 }

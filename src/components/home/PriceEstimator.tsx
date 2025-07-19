@@ -3,8 +3,6 @@
 import React, { useState } from 'react';
 import { Icon } from '../ui/Icon';
 import { Settings2, MapPin, Square, Bed, Bath, ArrowRight, Share2, CheckCircle } from 'lucide-react';
-import Lottie from 'lottie-react';
-import loadingAnimation from '../../../public/animations/calculation-loading.json';
 import { cn } from '../../lib/utils';
 
 interface FieldErrors {
@@ -307,7 +305,7 @@ export default function PriceEstimator() {
                 {loading ? (
                   <>
                     <span>Calculating your estimate</span>
-                    <Lottie animationData={loadingAnimation} className="w-6 h-6" />
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   </>
                 ) : (
                   <>
